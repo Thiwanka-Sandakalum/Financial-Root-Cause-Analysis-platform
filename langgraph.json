@@ -3,7 +3,7 @@
         "."
     ],
     "graphs": {
-        "agent": "./src/query/orchestration.py:agent"
+        "query_graph": "./studio_graph.py:graph"
     },
     "env": ".env"
 }

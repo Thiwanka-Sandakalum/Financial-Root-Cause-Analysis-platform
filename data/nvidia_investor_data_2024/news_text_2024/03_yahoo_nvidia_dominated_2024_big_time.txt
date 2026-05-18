@@ -1,0 +1,22 @@
+Title: Yahoo Finance: Nvidia dominated 2024 big-time. Next year? Plenty of challenges.
+Source URL: https://finance.yahoo.com/news/nvidia-dominated-2024-big-time-next-year-plenty-of-challenges-110047391.html
+Fetched: 2026-05-10
+
+Main Content (extracted):
+
+By Daniel Howley (Technology Editor), updated Dec 29, 2024.
+
+Nvidia had an exceptional 2024, with revenue and stock price growth driven by generative AI demand and its leadership in AI infrastructure. The company repeatedly traded places with Apple for the highest market capitalization among public companies, crossing the $3 trillion threshold.
+
+The article highlights continued momentum from Nvidia's Blackwell AI platform rollout, with expectations of shipping billions of dollars of Blackwell hardware in the near term.
+
+A central argument is Nvidia's first-mover advantage: early investment in AI software and ecosystem tooling, especially CUDA, helped lock in broad developer and hyperscaler adoption.
+
+Major cloud providers including Microsoft, Alphabet/Google, Amazon, and Meta continued heavy spending on Nvidia chips. In the referenced quarter, Nvidia reported about $35.1 billion total revenue, with roughly $30.8 billion (87%) from data center.
+
+The piece also emphasizes rising competitive pressure from AMD, Broadcom, and custom in-house chips being developed by hyperscalers to reduce dependence on Nvidia.
+
+Bottom line from the article
+- Nvidia remained the clear AI infrastructure leader through 2024.
+- Competitive threats are increasing, but replacing Nvidia's near-term dominance appears difficult.
+- 2025 is framed as a year where execution and competition both intensify.

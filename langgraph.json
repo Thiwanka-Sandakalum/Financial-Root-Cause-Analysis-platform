@@ -1,0 +1,9 @@
+{
+    "dependencies": [
+        "."
+    ],
+    "graphs": {
+        "agent": "./src/query/orchestration.py:agent"
+    },
+    "env": ".env"
+}

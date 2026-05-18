@@ -1,0 +1,18 @@
+Title: Reuters: Nvidia becomes world's most valuable company
+Source URL: https://www.reuters.com/technology/view-nvidia-becomes-worlds-most-valuable-company-2024-06-18/
+Fetched: 2026-05-10
+
+Fetch Status
+- Unable to retrieve article body programmatically.
+- HTTP error: 401 (access restricted).
+
+Attempted alternate Reuters URL
+- https://www.reuters.com/world/us/nvidia-overtakes-microsoft-most-valuable-company-2024-06-18/
+- Result: HTTP 401
+
+Captured metadata
+- Topic: NVIDIA reaching the top global market value position in June 2024.
+- Source remains referenced for manual retrieval in a browser session with access.
+
+Note
+If needed, I can retry with a browser-export workflow after you open this Reuters article in an authenticated session.

@@ -1,0 +1,33 @@
+Title: Investor's Business Daily: Nvidia Among Biggest Stock Market Winners In 2024, But This Is No. 1
+Source URL: https://www.investors.com/news/sp500-nvidia-stock-market-winners-2024-this-is-no-1/
+Fetched: 2026-05-10
+
+Main Content (extracted):
+
+Published Jul 1, 2024 (Ed Carson).
+
+The article ranks leading S&P 500 performers in 2024 YTD and places Nvidia near the top but behind Super Micro Computer at that point in time.
+
+S&P 500 top performers table excerpt
+- Super Micro Computer (SMCI): +188.24%
+- Nvidia (NVDA): +149.47%
+- Vistra (VST): +123.21%
+- Constellation Energy (CEG): +71.33%
+- Eli Lilly (LLY): +55.32%
+- Micron (MU): +54.12%
+- NRG Energy (NRG): +50.60%
+- CrowdStrike (CRWD): +50.08%
+- Arista Networks (ANET): +48.82%
+- Targa Resources (TRGP): +48.24%
+
+Nvidia section highlights
+- Nvidia is described as the dominant AI chip maker with strong technology leadership and sustained demand.
+- Reported growth metrics cited include very large year-over-year gains in earnings and sales across multiple quarters.
+- The piece notes a major stock move in 2024, including a breakout after Q1 results and the announced 10-for-1 stock split.
+
+Other themes in the article
+- AI beneficiaries span semiconductors, networking, cybersecurity, and power generation.
+- Several names are discussed in technical chart terms (breakouts, bases, support levels).
+
+Note
+The fetched output included significant site navigation/footer material; this file keeps the article's core extracted points.

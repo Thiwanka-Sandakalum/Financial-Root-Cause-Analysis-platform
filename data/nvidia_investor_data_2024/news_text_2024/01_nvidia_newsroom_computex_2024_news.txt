@@ -1,0 +1,37 @@
+Title: NVIDIA Newsroom: COMPUTEX 2024 News
+Source URL: https://nvidianews.nvidia.com/online-press-kit/computex-2024-news
+Fetched: 2026-05-10
+
+Main Content (extracted):
+
+COMPUTEX 2024 News
+
+Wrap-Up
+- 'Accelerate Everything,' NVIDIA CEO Says Ahead of COMPUTEX
+
+Press Releases
+- NVIDIA Releases Digital Human Microservices, Paving Way for Future of Generative AI Avatars
+- NVIDIA NIM Revolutionizes Model Deployment, Now Available to Transform World's Millions of Developers Into Generative AI Developers
+- NVIDIA Supercharges Ethernet Networking for Generative AI
+- Computer Industry Joins NVIDIA to Build AI Factories and Data Centers for the Next Industrial Revolution
+- NVIDIA Brings AI Assistants to Life With GeForce RTX AI PCs
+- Robotic Factories Supercharge Industrial Digitalization as Electronic Makers Adopt NVIDIA AI and Omniverse
+- NVIDIA Robotics Adopted by Industry Leaders for Development of Tens of Millions of AI-Powered Autonomous Machines
+- NVIDIA Enables Real-Time Healthcare, Industrial and Scientific AI Applications at the Edge With Enterprise Software Support for NVIDIA IGX With Holoscan
+
+Blogs
+- Power Tool: Generative AI Tracks Typhoons, Tames Energy Use
+- Foxconn Trains Robots, Streamlines Assembly With NVIDIA AI and Omniverse
+- Gen AI Healthcare Accelerated: Dozens of Companies Adopt Meta Llama 3 NIM
+- Putting More Tech to the Test, NVIDIA Certifies New Categories of Gen AI-Ready Systems
+- Leading Medical Centers in Taiwan Adopt NVIDIA Accelerated Computing to Advance Biomedical Research
+- KServe Providers Dish Up NIMble Inference in Clouds and Data Centers
+- Taiwan Electronics Giants Drive Industrial Automation With NVIDIA Metropolis and NIM
+
+Additional assets listed on page
+- Image downloads for Blackwell AI Factories, Spectrum-X, NIM, RTX AI PC, keynote images
+- COMPUTEX 2024 keynote deck
+- NVIDIA media contact emails and newsroom links
+
+Note
+This page is an online press kit / roundup linking to many individual announcements, rather than one single long article body.

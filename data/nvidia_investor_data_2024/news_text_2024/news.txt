@@ -1,0 +1,48 @@
+Nvidia earnings: AI chip leader shows no signs of stopping mammoth growth
+This article is more than 1 year old
+World’s most valuable company delights investors as it reports $35bn of revenue in quarterly results
+
+Edward Helmore
+Wed 20 Nov 2024 22.02 GMT
+Share
+Prefer the Guardian on Google
+The AI chipmaker Nvidia, the world’s most valuable company and the engine of the artificial-intelligence boom, rolled out another set of quarterly results on Wednesday to investors’ delight.
+
+The company, whose value has soared by $2.2tn this year to $3.6tn on the back of near-doubling of chip sales, said it had revenue of $35.08bn, against expectations of $33.15bn. Its profits more than doubled year-over-year. Revenue surged 94% from the same quarter last year. The company projected that revenue would increase by 70% in the coming quarter.
+
+Analysts anticipated Nvidia to report earnings of $0.75 per share; the company reported $0.81. Shares of Nvidia fell about 5% in extended trading following the announcement but soon recouped the losses to remain at a similar price; they previously closed at $145.89 in New York.
+
+
+The Nvidia chief, Jensen Huang, who last week said he expected the computing power driving advances in generative AI to increase by “a millionfold” over the next decade, said in a press release.
+
+In an earnings call, Huang said that global adoption of Nvidia technology was creating a platform shift from coding to machine learning, with traditional data centers being rebuilt for machine learning to produce AI.
+
+“Generative AI is not just a new software capability but a new industry with AI factories manufacturing digital intelligence – a new industrial revolution that can create a multi-trillion-dollar AI industry,” he said.
+
+“AI is transforming every industry, company and country,” Huang added. “Creating an omniverse of synthetically generated data … the age of robotics is coming.”
+
+Soaring demand for Nvidia’s Blackwell GPU chips appears to have quelled anxiety that the company could be hit by pullback in demand from tech giants sinking billions into AI processing and data centers.
+
+Nvidia’s value has bounced back after a summer slump, rising 45% from an August low. The chip stock – up nearly 200% this year and up over 1,100% in the last two years – hit record highs following the election.
+
+
+But many of Nvidia’s chip-making peers have become a net drag on the industry as they struggle to compete with its AI dominance.
+
+Before the results were announced, the Wedbush analyst Dan Ives said he expected another “drop-the-mic performance” from Nvidia, saying it was “the only game in town with $1tn+ of AI cap-ex on the way for the next few years with Nvidia’s GPUs the new oil and gold in this world”.
+
+The world’s biggest tech companies have increased the amount they invest in AI by billions in recent quarters, positioning Nvidia as a major beneficiary.
+
+Nvidia, which many see as a bellwether of the tech sector and artificial-intelligence demand that has helped power Wall Street to multiple record highs this year.
+
+But an escalation in the Russia-Ukraine war, the threat of global tariff hikes from Donald Trump’s incoming administration, and the likelihood that US interest rates will not be cut by the Federal Reserve have also put markets on edge.
+
+Other analysts agreed with Ives’s assessment that demand for Nvidia’s new Blackwell chip could push Nvidia sales and market capitalization to new heights. The Saxo chief investment strategist Charu Chanana wrote that signs of “extraordinary demand” for the new chip, including forecasts of record sales and reports of sold-out inventories for the next year, are strong indicators of Nvidia’s continued high performance.
+
+But Chanana warned that “any signs of production delays or demand falling short could pressure the stock given its stretched valuation”.
+
+Earlier this week, a report said that the chipmaker is having overheating issues with servers for its newest graphics chip, B200 & GB200 NVL72, both named for David Harold Blackwell, a prominent American mathematician and statistician.
+
+A spokesperson for Nvidia did not reject the report directly but said “the engineering iterations are normal and expected”.
+
+The computer billionaire Michael Dell posted that “minutiae can shake you out of tremendous investments every time”.
+

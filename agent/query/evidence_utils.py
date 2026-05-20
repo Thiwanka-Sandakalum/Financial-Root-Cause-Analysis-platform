@@ -41,7 +41,9 @@ def dedupe_documents(docs: list[dict]) -> list[dict]:
         seen.add(key)
         unique_docs.append(doc)
 
-    unique_docs.sort(key=lambda doc: float(doc.get("metadata", {}).get("score", 0.0)), reverse=True)
+    unique_docs.sort(
+        key=lambda doc: float(doc.get("metadata", {}).get("score", 0.0)), reverse=True
+    )
     return unique_docs
 
 
@@ -73,7 +75,9 @@ def table_has_multi_period_comparison(evidence: list[dict]) -> bool:
         if not text:
             continue
 
-        period_tokens = {token.upper().replace(" ", "") for token in period_pattern.findall(text)}
+        period_tokens = {
+            token.upper().replace(" ", "") for token in period_pattern.findall(text)
+        }
         if len(period_tokens) >= 2:
             return True
 

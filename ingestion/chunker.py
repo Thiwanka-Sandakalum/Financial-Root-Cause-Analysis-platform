@@ -10,20 +10,22 @@ from ingestion.parser import ParsedSection
 # Data model
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class Chunk:
     id: str
     text: str
     section_type: str
-    section_id: str        # parent Section node id
+    section_id: str  # parent Section node id
     page: int
-    sequence: int          # position within its document (global)
+    sequence: int  # position within its document (global)
     source_doc_id: str
 
 
 # ---------------------------------------------------------------------------
 # Chunker
 # ---------------------------------------------------------------------------
+
 
 def chunk_section(
     section: ParsedSection,
@@ -65,15 +67,17 @@ def chunk_section(
         text = text.strip()
         if not text:
             continue
-        chunks.append(Chunk(
-            id=f"{doc_id}_{section.section_type}_{sequence_offset + i}",
-            text=text,
-            section_type=section.section_type,
-            section_id=section_id,
-            page=section.page_start,
-            sequence=sequence_offset + i,
-            source_doc_id=doc_id,
-        ))
+        chunks.append(
+            Chunk(
+                id=f"{doc_id}_{section.section_type}_{sequence_offset + i}",
+                text=text,
+                section_type=section.section_type,
+                section_id=section_id,
+                page=section.page_start,
+                sequence=sequence_offset + i,
+                source_doc_id=doc_id,
+            )
+        )
 
     return chunks
 

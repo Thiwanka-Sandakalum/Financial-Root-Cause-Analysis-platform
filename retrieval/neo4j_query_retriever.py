@@ -4,6 +4,10 @@ from typing import Iterable
 
 from langsmith import traceable
 from neo4j import Driver
+from neo4j.exceptions import Neo4jError
+
+
+_SEARCH_VECTOR_SUPPORTED: bool | None = None
 
 
 def _normalize_text(value: str | None) -> str:
@@ -27,24 +31,67 @@ def _vector_search(
     embedding: list[float],
     top_k: int,
 ) -> list[dict]:
-    with driver.session() as session:
-        if index_name == "chunk_embeddings":
-            query = """
+    global _SEARCH_VECTOR_SUPPORTED
+
+    search_query: str
+    legacy_query: str
+    if index_name == "chunk_embeddings":
+        search_query = """
+            SEARCH INDEX chunk_embeddings
+            FOR (node:Chunk) ON (node.embedding)
+            WHERE node.embedding ANN OF $embedding TOP $top_k
+            YIELD node, score
+            RETURN node, score
+            ORDER BY score DESC
+        """
+        legacy_query = """
             CALL db.index.vector.queryNodes('chunk_embeddings', $top_k, $embedding)
             YIELD node, score
             RETURN node, score
             ORDER BY score DESC
-            """
-        else:
-            query = """
+        """
+    else:
+        search_query = """
+            SEARCH INDEX table_embeddings
+            FOR (node:Table) ON (node.embedding)
+            WHERE node.embedding ANN OF $embedding TOP $top_k
+            YIELD node, score
+            RETURN node, score
+            ORDER BY score DESC
+        """
+        legacy_query = """
             CALL db.index.vector.queryNodes('table_embeddings', $top_k, $embedding)
             YIELD node, score
             RETURN node, score
             ORDER BY score DESC
-            """
+        """
+
+    # Current DB can emit deprecation notifications for queryNodes.
+    # Silence only DEPRECATION notifications to keep logs readable.
+    with driver.session(
+        notifications_disabled_classifications=["DEPRECATION"]
+    ) as session:
+        if _SEARCH_VECTOR_SUPPORTED is not False:
+            try:
+                rows = session.run(
+                    search_query,
+                    top_k=top_k,
+                    embedding=embedding,
+                ).data()
+                _SEARCH_VECTOR_SUPPORTED = True
+                return rows
+            except Neo4jError as exc:
+                # Older servers may not support SEARCH syntax yet.
+                if _SEARCH_VECTOR_SUPPORTED is True:
+                    raise
+                msg = str(exc)
+                if "Invalid input 'SEARCH'" in msg or "SyntaxError" in msg:
+                    _SEARCH_VECTOR_SUPPORTED = False
+                else:
+                    raise
 
         rows = session.run(
-            query,
+            legacy_query,
             top_k=top_k,
             embedding=embedding,
         ).data()

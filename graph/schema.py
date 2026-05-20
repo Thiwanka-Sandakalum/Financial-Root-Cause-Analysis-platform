@@ -35,25 +35,31 @@ def create_schema(driver: Driver, embedding_dim: int = 3072) -> None:
 
         # --- Vector index on Chunk.embedding ---
         # Dimensions must match the model configured in GEMINI_EMBEDDING_MODEL.
-        session.run("""
+        session.run(
+            """
             CREATE VECTOR INDEX chunk_embeddings IF NOT EXISTS
             FOR (ch:Chunk) ON (ch.embedding)
             OPTIONS {indexConfig: {
                 `vector.dimensions`: $embedding_dim,
                 `vector.similarity_function`: 'cosine'
             }}
-        """, embedding_dim=embedding_dim)
+        """,
+            embedding_dim=embedding_dim,
+        )
 
         # --- Vector index on Table.embedding ---
         # Tables are embedded with their section heading as context prefix
         # so they are independently retrievable by semantic similarity.
-        session.run("""
+        session.run(
+            """
             CREATE VECTOR INDEX table_embeddings IF NOT EXISTS
             FOR (t:Table) ON (t.embedding)
             OPTIONS {indexConfig: {
                 `vector.dimensions`: $embedding_dim,
                 `vector.similarity_function`: 'cosine'
             }}
-        """, embedding_dim=embedding_dim)
+        """,
+            embedding_dim=embedding_dim,
+        )
 
     print(f"[schema] Constraints and vector indexes created (dim={embedding_dim}).")

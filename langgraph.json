@@ -1,9 +1,15 @@
 {
     "dependencies": [
-        "."
+        ".",
+        "neo4j>=5.24.0",
+        "python-dotenv>=1.0.1",
+        "langchain-google-genai>=2.0.0",
+        "langchain-core>=0.2.30",
+        "langgraph>=0.2.0",
+        "pydantic>=2.7.0"
     ],
     "graphs": {
-        "query_graph": "./studio_graph.py:graph"
+        "rootalpha": "./agent/query/main.py:graph"
     },
     "env": ".env"
 }

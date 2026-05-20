@@ -22,9 +22,15 @@ class QueryIntent(BaseModel):
     intent: IntentType = Field(description="Primary question type")
     needs_tables: bool = Field(description="Whether table evidence is needed")
     needs_graph_traversal: bool = Field(description="Whether graph expansion is needed")
-    needs_multi_period: bool = Field(description="Whether multiple periods are required")
-    needs_company_filter: bool = Field(description="Whether the query should filter to one company")
-    confidence: float = Field(ge=0.0, le=1.0, description="Intent classification confidence")
+    needs_multi_period: bool = Field(
+        description="Whether multiple periods are required"
+    )
+    needs_company_filter: bool = Field(
+        description="Whether the query should filter to one company"
+    )
+    confidence: float = Field(
+        ge=0.0, le=1.0, description="Intent classification confidence"
+    )
     rationale: str = Field(description="Short explanation for the classification")
 
 

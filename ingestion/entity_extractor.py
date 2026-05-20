@@ -17,16 +17,19 @@ T = TypeVar("T")
 # Pydantic output models
 # ---------------------------------------------------------------------------
 
+
 class ExtractedEntity(BaseModel):
     name: str
-    type: str   # Company | Executive | Product | FinancialMetric | RiskFactor | MacroEvent | FinancialEvent
+    type: str  # Company | Executive | Product | FinancialMetric | RiskFactor | MacroEvent | FinancialEvent
     properties: dict = Field(default_factory=dict)
 
 
 class ExtractedRelation(BaseModel):
     source: str
     target: str
-    relationship: str   # CAUSED | MENTIONS | COMPETES_WITH | DEPENDS_ON | IMPACTED | HAS_EXECUTIVE
+    relationship: (
+        str  # CAUSED | MENTIONS | COMPETES_WITH | DEPENDS_ON | IMPACTED | HAS_EXECUTIVE
+    )
     properties: dict = Field(default_factory=dict)
 
 
@@ -56,10 +59,12 @@ Return ONLY a single valid JSON object — no prose, no markdown fences:
 
 If nothing is extractable, return: {{"entities": [], "relations": []}}"""
 
-_EXTRACTION_PROMPT = ChatPromptTemplate.from_messages([
-    ("system", _SYSTEM),
-    ("human", "Extract from this financial text:\n\n{text}"),
-])
+_EXTRACTION_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        ("system", _SYSTEM),
+        ("human", "Extract from this financial text:\n\n{text}"),
+    ]
+)
 
 _ALLOWED_ENTITY_TYPES = {
     "Company",
@@ -129,6 +134,7 @@ def _sanitize_result(result: ExtractionResult, chunk_id: str) -> ExtractionResul
 # ---------------------------------------------------------------------------
 # Extractor
 # ---------------------------------------------------------------------------
+
 
 def extract_entities_and_relations(
     chunks: List[Chunk],

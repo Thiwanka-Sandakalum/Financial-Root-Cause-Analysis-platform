@@ -33,7 +33,9 @@ def make_nodes(
 
     def normalize_input(state: QueryState) -> dict:
         question = question_from_state(state)
-        messages = state.get("messages") or messages_from_input_payload(state.get("input"))
+        messages = state.get("messages") or messages_from_input_payload(
+            state.get("input")
+        )
 
         if not messages and question:
             messages = [HumanMessage(content=question)]
@@ -76,7 +78,9 @@ def make_nodes(
             driver=driver,
             embedding=query_embedding,
             top_k=plan.get("top_k_chunks", 6),
-            company_ticker=state.get("company_ticker") if plan.get("use_company_filter", True) else None,
+            company_ticker=state.get("company_ticker")
+            if plan.get("use_company_filter", True)
+            else None,
             time_filter=state.get("time_filter"),
         )
         return {"chunk_hits": docs}
@@ -95,7 +99,9 @@ def make_nodes(
             driver=driver,
             embedding=query_embedding,
             top_k=plan.get("top_k_tables", 4),
-            company_ticker=state.get("company_ticker") if plan.get("use_company_filter", True) else None,
+            company_ticker=state.get("company_ticker")
+            if plan.get("use_company_filter", True)
+            else None,
             time_filter=state.get("time_filter"),
         )
         return {"table_hits": docs}
@@ -134,16 +140,22 @@ def make_nodes(
         doc_types = {item.get("doc_type") for item in evidence if item.get("doc_type")}
         has_table_multi_period = table_has_multi_period_comparison(evidence)
 
-        if intent.get("needs_multi_period") and len(periods) < 2 and not has_table_multi_period:
+        if (
+            intent.get("needs_multi_period")
+            and len(periods) < 2
+            and not has_table_multi_period
+        ):
             gaps.append("Need evidence from multiple periods for this question.")
 
-        if intent.get("needs_tables") and not any(item.get("source_type") == "table" for item in evidence):
+        if intent.get("needs_tables") and not any(
+            item.get("source_type") == "table" for item in evidence
+        ):
             gaps.append("Need table evidence for this question.")
 
         if plan.get("use_causal_edges") and not state.get("graph_paths"):
             gaps.append("Need graph traversal evidence for causal explanation.")
 
-        if state.get("company_ticker") and not state.get("company_ticker") in {
+        if state.get("company_ticker") and state.get("company_ticker") not in {
             item.get("ticker") for item in evidence if item.get("ticker")
         }:
             gaps.append("No company-filtered evidence matched the requested ticker.")

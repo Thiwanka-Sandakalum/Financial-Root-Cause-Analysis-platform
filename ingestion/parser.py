@@ -97,7 +97,9 @@ def _spans_cover_all_pages(spans: List[SectionSpan], page_numbers: List[int]) ->
     return covered == expected
 
 
-def _fallback_single_section(page_data: List[dict], title: str = "Document") -> List["ParsedSection"]:
+def _fallback_single_section(
+    page_data: List[dict], title: str = "Document"
+) -> List["ParsedSection"]:
     if not page_data:
         return []
     sorted_pages = sorted(page_data, key=lambda p: p["page_num"])
@@ -179,40 +181,54 @@ def parse_financial_pdf(
             f"LlamaParse returned no content for {pdf_path}. Job status: {result.job.status}"
         )
 
-    _save_markdown(pdf_path, result.markdown_full or "\n\n".join(
-        p.markdown for p in result.markdown.pages if isinstance(p, MarkdownPageMarkdownResultPage)
-    ))
+    _save_markdown(
+        pdf_path,
+        result.markdown_full
+        or "\n\n".join(
+            p.markdown
+            for p in result.markdown.pages
+            if isinstance(p, MarkdownPageMarkdownResultPage)
+        ),
+    )
 
-    markdown_pages = [p for p in result.markdown.pages if isinstance(p, MarkdownPageMarkdownResultPage)]
-    items_pages    = [p for p in result.items.pages    if isinstance(p, ItemsPageStructuredResultPage)]
+    markdown_pages = [
+        p
+        for p in result.markdown.pages
+        if isinstance(p, MarkdownPageMarkdownResultPage)
+    ]
+    items_pages = [
+        p for p in result.items.pages if isinstance(p, ItemsPageStructuredResultPage)
+    ]
 
     items_by_page = {p.page_number: p.items for p in items_pages}
 
     # ── Phase 1: Extract per-page data ──────────────────────────────────────
     page_data: List[dict] = []
     for md_page in markdown_pages:
-        page_num   = md_page.page_number
-        page_md    = md_page.markdown or ""
+        page_num = md_page.page_number
+        page_md = md_page.markdown or ""
         page_items = items_by_page.get(page_num, [])
-        headings   = extract_page_headings(page_items)
-        tables     = [
+        headings = extract_page_headings(page_items)
+        tables = [
             item.md
             for item in page_items
             if getattr(item, "type", None) == "table" and getattr(item, "md", None)
         ]
-        page_data.append({
-            "page_num": page_num,
-            "headings": headings,
-            "tables":   tables,
-            "markdown": page_md,
-        })
+        page_data.append(
+            {
+                "page_num": page_num,
+                "headings": headings,
+                "tables": tables,
+                "markdown": page_md,
+            }
+        )
 
     # ── Phase 2: Classify pages via a single LLM call ───────────────────────
     page_outlines = [
         {
-            "page":     pd["page_num"],
+            "page": pd["page_num"],
             "headings": pd["headings"],
-            "snippet":  pd["markdown"][:200].replace("\n", " "),
+            "snippet": pd["markdown"][:200].replace("\n", " "),
         }
         for pd in page_data
     ]
@@ -227,7 +243,9 @@ def parse_financial_pdf(
         return _fallback_single_section(page_data)
 
     if not _spans_cover_all_pages(spans, [pd["page_num"] for pd in page_data]):
-        print("  [parser] Invalid section spans returned by classifier, using fallback sectioning")
+        print(
+            "  [parser] Invalid section spans returned by classifier, using fallback sectioning"
+        )
         return _fallback_single_section(page_data)
 
     # ── Phase 3: Assemble ParsedSection objects ──────────────────────────────
@@ -240,15 +258,17 @@ def parse_financial_pdf(
             for n in range(span.page_start, span.page_end + 1)
             if n in by_page
         ]
-        sections.append(ParsedSection(
-            section_type=span.section_type,
-            title=span.title,
-            content="\n".join(pd["markdown"] for pd in span_pages),
-            tables=[tbl for pd in span_pages for tbl in pd["tables"]],
-            headings=[h for pd in span_pages for h in pd["headings"]],
-            page_start=span.page_start,
-            page_end=span.page_end,
-        ))
+        sections.append(
+            ParsedSection(
+                section_type=span.section_type,
+                title=span.title,
+                content="\n".join(pd["markdown"] for pd in span_pages),
+                tables=[tbl for pd in span_pages for tbl in pd["tables"]],
+                headings=[h for pd in span_pages for h in pd["headings"]],
+                page_start=span.page_start,
+                page_end=span.page_end,
+            )
+        )
 
     return sections
 
@@ -257,12 +277,14 @@ def parse_text_file(txt_path: str) -> List[ParsedSection]:
     with open(txt_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    return [ParsedSection(
-        section_type="GENERAL",
-        title="Article",
-        content=content,
-        tables=[],
-        headings=[],
-        page_start=1,
-        page_end=1,
-    )]
+    return [
+        ParsedSection(
+            section_type="GENERAL",
+            title="Article",
+            content=content,
+            tables=[],
+            headings=[],
+            page_start=1,
+            page_end=1,
+        )
+    ]

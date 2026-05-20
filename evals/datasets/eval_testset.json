@@ -1,0 +1,217 @@
+[
+    {
+        "category": "revenue",
+        "question": "What was NVIDIA total revenue in Q2 FY2025 compared to Q1 FY2025 and Q2 FY2024?",
+        "reference": "NVIDIA total revenue in Q2 FY2025 was $30.0 billion, up 15% from Q1 FY2025 and up 122% from Q2 FY2024.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "revenue_segment",
+        "question": "What was NVIDIA Data Center revenue in Q2 FY2025 and what drove its growth?",
+        "reference": "Data Center revenue in Q2 FY2025 was a record $26.3 billion, up 16% from Q1 FY2025 and up 154% from Q2 FY2024. Growth was driven by demand for the Hopper GPU computing platform for training and inferencing of large language models, recommendation engines, and generative AI applications.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "revenue_segment",
+        "question": "What was NVIDIA Gaming revenue in Q2 FY2025 and how did it change year-over-year?",
+        "reference": "NVIDIA Gaming revenue in Q2 FY2025 was $2.9 billion, up 9% from Q1 FY2025 and up 16% from Q2 FY2024, reflecting higher sales of GeForce RTX 40 Series GPUs and game console SOCs.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "revenue_segment",
+        "question": "What was NVIDIA Professional Visualization revenue in Q2 FY2025?",
+        "reference": "NVIDIA Professional Visualization revenue in Q2 FY2025 was $454 million, up 6% from Q1 FY2025 and up 20% from Q2 FY2024, driven by the ramp of RTX GPU workstations based on the Ada architecture.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "revenue_segment",
+        "question": "What was NVIDIA Automotive revenue in Q2 FY2025 and what drove the increase?",
+        "reference": "NVIDIA Automotive revenue in Q2 FY2025 was $346 million, up 5% from Q1 FY2025 and up 37% from Q2 FY2024, driven by AI Cockpit solutions and self-driving platforms.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "earnings",
+        "question": "What was NVIDIA GAAP and non-GAAP earnings per diluted share in Q2 FY2025?",
+        "reference": "NVIDIA GAAP earnings per diluted share in Q2 FY2025 was $0.67, up 12% from Q1 FY2025 and up 168% from Q2 FY2024. Non-GAAP earnings per diluted share was $0.68, up 11% from Q1 FY2025 and up 152% from Q2 FY2024.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "gross_margin",
+        "question": "Why did NVIDIA gross margin decrease sequentially in Q2 FY2025?",
+        "reference": "NVIDIA gross margins decreased sequentially in Q2 FY2025 primarily driven by inventory provisions for low-yielding Blackwell material and a higher mix of new products within Data Center.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "guidance",
+        "question": "What is NVIDIA's revenue outlook for Q3 FY2025?",
+        "reference": "NVIDIA expects Q3 FY2025 revenue to be $32.5 billion, plus or minus 2%.",
+        "ticker": "NVDA",
+        "period": "Q3 FY2025"
+    },
+    {
+        "category": "guidance",
+        "question": "What gross margin guidance did NVIDIA provide for Q3 FY2025?",
+        "reference": "NVIDIA expects GAAP gross margin of 74.4% and non-GAAP gross margin of 75.0% for Q3 FY2025, both plus or minus 50 basis points. For the full year, gross margins are expected to be in the mid-70% range.",
+        "ticker": "NVDA",
+        "period": "Q3 FY2025"
+    },
+    {
+        "category": "product",
+        "question": "What is the Blackwell production ramp timeline according to NVIDIA's Q2 FY2025 report?",
+        "reference": "Blackwell production ramp is scheduled to begin in the fourth quarter of FY2025 and continue into FY2026. NVIDIA executed a change to the Blackwell GPU mask to improve production yield, and shipped customer samples in Q2 FY2025.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "product",
+        "question": "What role did cloud service providers play in NVIDIA Data Center revenue in Q2 FY2025?",
+        "reference": "Cloud service providers represented roughly 45% of NVIDIA Data Center revenue in Q2 FY2025, while more than 50% stemmed from consumer internet and enterprise companies.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "product",
+        "question": "What was NVIDIA's Data Center compute revenue and networking revenue in Q2 FY2025?",
+        "reference": "Data Center compute revenue was $22.6 billion in Q2 FY2025, up 162% from Q2 FY2024 and up 17% sequentially. Networking revenue was $3.7 billion, up 114% from Q2 FY2024, including InfiniBand and Ethernet for AI (Spectrum-X). Networking revenue grew 16% sequentially with a doubling of Ethernet for AI revenue.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "balance_sheet",
+        "question": "What was NVIDIA's cash and marketable securities balance at end of Q2 FY2025?",
+        "reference": "NVIDIA's cash, cash equivalents, and marketable securities were $34.8 billion at the end of Q2 FY2025, up from $16.0 billion a year ago and $31.4 billion at the end of Q1 FY2025.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "balance_sheet",
+        "question": "What was NVIDIA's inventory level and days sales of inventory in Q2 FY2025?",
+        "reference": "NVIDIA's inventory was $6.7 billion with 81 days sales of inventory (DSI) at the end of Q2 FY2025. Purchase commitments and obligations for inventory and manufacturing capacity were $27.8 billion.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "cash_flow",
+        "question": "What was NVIDIA's cash flow from operating activities in Q2 FY2025?",
+        "reference": "NVIDIA's cash flow from operating activities was $14.5 billion in Q2 FY2025, up from $6.3 billion in Q2 FY2024 and down from $15.3 billion in Q1 FY2025. The year-over-year increase reflects higher revenue partially offset by higher cash taxes paid.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "shareholder_returns",
+        "question": "How much did NVIDIA return to shareholders in the first half of FY2025?",
+        "reference": "NVIDIA returned $15.4 billion to shareholders in the first half of FY2025 through share repurchases and cash dividends. In Q2 FY2025 alone, NVIDIA utilized $7.4 billion toward shareholder returns, including $7.2 billion in share repurchases and $246 million in cash dividends.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "shareholder_returns",
+        "question": "What share repurchase authorization did NVIDIA's board approve in August 2024?",
+        "reference": "On August 26, 2024, NVIDIA's Board of Directors approved an additional $50.0 billion in share repurchase authorization, without expiration. As of the end of Q2 FY2025, the company had $7.5 billion remaining under its prior authorization.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "governance",
+        "question": "When did NVIDIA complete its stock split and what was the ratio?",
+        "reference": "NVIDIA completed a ten-for-one (10-for-1) forward stock split on June 7, 2024. All share and per-share amounts have been retroactively adjusted to reflect the stock split.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "governance",
+        "question": "What is NVIDIA's next quarterly cash dividend and when will it be paid?",
+        "reference": "NVIDIA will pay its next quarterly cash dividend of $0.01 per share on October 3, 2024, to all shareholders of record on September 12, 2024. The dividend increased by 150% to one cent per share in Q2 FY2025.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "risk_factors",
+        "question": "What key risk factors did NVIDIA disclose in its Q2 FY2025 filing?",
+        "reference": "NVIDIA disclosed risk factors including: global economic conditions, reliance on third parties to manufacture and test products, impact of technological development and competition, development of new products and technologies, market acceptance of products, design or manufacturing defects, changes in consumer preferences or demands, changes in industry standards, and unexpected loss of product performance when integrated into systems.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "tax",
+        "question": "What were NVIDIA's effective tax rates in Q2 FY2025?",
+        "reference": "NVIDIA's GAAP effective tax rate was 13.6% in Q2 FY2025, an increase from Q2 FY2024 reflecting the lower effect of tax benefits from the foreign derived intangible income deduction relative to the increase in pre-tax income. The non-GAAP effective tax rate was 16.6%.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "executive",
+        "question": "Who is NVIDIA's CFO and what is her role?",
+        "reference": "Colette M. Kress is NVIDIA's Executive Vice President and Chief Financial Officer. She signed the Q2 FY2025 Form 8-K filing and provided CFO Commentary on the quarter's results.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "multi_hop",
+        "question": "What product caused NVIDIA gross margin to decline sequentially in Q2 FY2025, and when is its production ramp scheduled?",
+        "reference": "The Blackwell GPU caused gross margin to decline sequentially in Q2 FY2025 due to inventory provisions for low-yielding Blackwell material. Blackwell production ramp is scheduled to begin in Q4 FY2025 and continue into FY2026, with several billion dollars in revenue expected in Q4 FY2025.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "multi_hop",
+        "question": "How did NVIDIA's interest income change in Q2 FY2025 and what drove it?",
+        "reference": "NVIDIA's interest income was $444 million in Q2 FY2025, up from Q2 FY2024 and Q1 FY2025, primarily reflecting higher cash balances. NVIDIA also recorded net realized and unrealized gains of $193 million from non-affiliated investments and publicly-held equity securities.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025"
+    },
+    {
+        "category": "robustness",
+        "question": "What was Apple's revenue in Q2 FY2025?",
+        "reference": "The document does not contain information about Apple's revenue. This filing covers only NVIDIA Corporation's financial results.",
+        "ticker": null,
+        "period": null
+    },
+    {
+        "category": "multi_hop_cross_section",
+        "question": "What specific operational challenges impacted NVIDIA's gross margin in Q2 FY2025, and what is the company's projected gross margin range for the full fiscal year?",
+        "reference": "Sequentially, gross margins decreased primarily due to inventory provisions for low-yielding Blackwell material and a higher mix of new products within the Data Center segment. Despite this, the company expects gross margins for the full fiscal year to be in the mid-70% range.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025",
+        "retrieval_hint": "Requires combining CFO Commentary (gross margin drivers) with Outlook section (full-year gross margin guidance)."
+    },
+    {
+        "category": "numerical_reasoning",
+        "question": "What were the exact dollar amounts for GAAP and Non-GAAP operating expenses in Q2 FY2025, and what was the largest adjustment made to reconcile the two?",
+        "reference": "In Q2 FY2025, GAAP operating expenses were $3,932 million, while Non-GAAP operating expenses were $2,792 million. The largest adjustment to reconcile the two was stock-based compensation expense, which amounted to $1,114 million.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025",
+        "retrieval_hint": "Requires reading the RECONCILIATION OF GAAP TO NON-GAAP FINANCIAL MEASURES table and identifying the largest line-item adjustment in the Q2 FY2025 column."
+    },
+    {
+        "category": "table_extraction",
+        "question": "Based on the Condensed Consolidated Statements of Cash Flows, what were the three largest drivers of cash used in investing activities during the six months ended July 28, 2024?",
+        "reference": "During the six months ended July 28, 2024, the three largest drivers of cash used in investing activities were: (1) Purchases of marketable securities: $(15,047) million; (2) Purchase related to property and equipment and intangible assets: $(1,346) million; (3) Purchases of investments in non-affiliated entities: $(534) million.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025",
+        "retrieval_hint": "Requires targeting the six-months column in the Cash Flow Statement table, filtering for investing activities, and ranking negative cash flows by magnitude."
+    },
+    {
+        "category": "timeline_events",
+        "question": "What were the total shareholder returns during the first half of fiscal 2025, and what new repurchase authorization was approved by the Board in August 2024?",
+        "reference": "During the first half of fiscal 2025, NVIDIA returned $15.4 billion to shareholders in the form of share repurchases and cash dividends. On August 26, 2024, the Board of Directors approved an additional $50.0 billion in share repurchase authorization, without expiration.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025",
+        "retrieval_hint": "Tests exact entity and date extraction alongside large financial figures from the press release section."
+    },
+    {
+        "category": "product_segment_deep_dive",
+        "question": "What are the two specific product categories mentioned as achieving significant scale in the Data Center segment, and how much sequential growth did Networking revenue see in Q2 FY2025?",
+        "reference": "Spectrum-X Ethernet for AI and NVIDIA AI Enterprise software are the two new product categories achieving significant scale. Networking revenue, which includes Spectrum-X, saw sequential growth of 16% in Q2 FY2025.",
+        "ticker": "NVDA",
+        "period": "Q2 FY2025",
+        "retrieval_hint": "Requires connecting Jensen Huang's qualitative quote about product scaling with the CFO commentary quantitative figures on Networking revenue growth."
+    }
+]

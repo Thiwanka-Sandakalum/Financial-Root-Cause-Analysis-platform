@@ -159,3 +159,8 @@ data/nvidia_investor_data_2024/news_text_2024/03_yahoo_nvidia_dominated_2024_big
 data/nvidia_investor_data_2024/news_text_2024/04_investors_nvidia_among_biggest_winners_2024.txt
 data/nvidia_investor_data_2024/news_text_2024/05_yahoo_nvidia_2024_year_in_review.txt
 data/nvidia_investor_data_2024/news_text_2024/news.txt
+.langgraph_api/.langgraph_checkpoint.1.pckl
+.langgraph_api/.langgraph_checkpoint.2.pckl
+.langgraph_api/.langgraph_checkpoint.3.pckl
+.langgraph_api/.langgraph_ops.pckl
+.langgraph_api/.langgraph_retry_counter.pckl

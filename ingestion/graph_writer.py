@@ -1,4 +1,3 @@
-import os
 import random
 import time
 import uuid
@@ -48,7 +47,9 @@ def _retry_call(func: Callable[[], T], context: str, max_attempts: int = 3) -> T
             if attempt == max_attempts:
                 break
             delay = (2 ** (attempt - 1)) + random.uniform(0, 0.25)
-            print(f"  [graph_writer] Retry {attempt}/{max_attempts - 1} for {context}: {exc}")
+            print(
+                f"  [graph_writer] Retry {attempt}/{max_attempts - 1} for {context}: {exc}"
+            )
             time.sleep(delay)
     assert last_exc is not None
     raise RuntimeError(f"Failed {context} after {max_attempts} attempts: {last_exc}")
@@ -58,7 +59,9 @@ def _normalize_name(name: str) -> str:
     return name.strip().title()
 
 
-def _write_document_company(tx, company_ticker, company_name, doc_id, doc_type, fiscal_period, filename):
+def _write_document_company(
+    tx, company_ticker, company_name, doc_id, doc_type, fiscal_period, filename
+):
     tx.run(
         """
         MERGE (c:Company {ticker: $ticker})
@@ -236,7 +239,7 @@ def ingest_document(
 
     chunk_texts = [c.text for c in all_chunks]
     table_texts = [r[3] for r in table_records]
-    all_texts   = chunk_texts + table_texts
+    all_texts = chunk_texts + table_texts
 
     print(f"  Embedding {len(chunk_texts)} chunk(s) + {len(table_texts)} table(s) ...")
     all_embeddings = _retry_call(
@@ -252,10 +255,12 @@ def ingest_document(
 
     embedding_dims = {len(vec) for vec in all_embeddings}
     if len(embedding_dims) != 1:
-        raise RuntimeError(f"Inconsistent embedding dimensions: {sorted(embedding_dims)}")
+        raise RuntimeError(
+            f"Inconsistent embedding dimensions: {sorted(embedding_dims)}"
+        )
 
-    chunk_embeddings = all_embeddings[:len(chunk_texts)]
-    table_embeddings = all_embeddings[len(chunk_texts):]
+    chunk_embeddings = all_embeddings[: len(chunk_texts)]
+    table_embeddings = all_embeddings[len(chunk_texts) :]
     print(f"  Embedding done (dim={len(all_embeddings[0])})")
 
     # ── Step 4: Entity extraction (key sections only) ─────────────────────────
@@ -299,7 +304,9 @@ def ingest_document(
             "sequence": tbl_seq,
             "embedding": table_emb,
         }
-        for (section_id, tbl_seq, table_md, _), table_emb in zip(table_records, table_embeddings)
+        for (section_id, tbl_seq, table_md, _), table_emb in zip(
+            table_records, table_embeddings
+        )
     ]
 
     mentions_by_type = defaultdict(list)
@@ -319,15 +326,15 @@ def ingest_document(
 
         for rel in extraction.relations:
             if rel.relationship not in _ALLOWED_REL_TYPES:
-                print(f"  [graph_writer] Skipped invalid relationship type '{rel.relationship}'")
+                print(
+                    f"  [graph_writer] Skipped invalid relationship type '{rel.relationship}'"
+                )
                 continue
             source = _normalize_name(rel.source)
             target = _normalize_name(rel.target)
             if not source or not target:
                 continue
-            rels_by_type[rel.relationship].append(
-                {"source": source, "target": target}
-            )
+            rels_by_type[rel.relationship].append({"source": source, "target": target})
 
     with driver.session() as session:
         session.execute_write(

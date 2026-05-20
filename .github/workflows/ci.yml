@@ -1,0 +1,65 @@
+name: CI
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    lint-and-test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Install uv
+              uses: astral-sh/setup-uv@v5
+              with:
+                  version: "latest"
+                  enable-cache: true
+
+            - name: Formatter check (Ruff)
+              run: uv run ruff format --check
+
+            - name: Linter check (Ruff)
+              run: uv run ruff check
+
+            - name: Run unit & mock integration tests
+              run: |
+                  uv run pytest --tb=short
+
+            - name: Run pipeline evaluation quality gate
+              env:
+                  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+                  LLAMA_CLOUD_API_KEY: ${{ secrets.LLAMA_CLOUD_API_KEY }}
+                  NEO4J_URI: ${{ secrets.NEO4J_URI }}
+                  NEO4J_USERNAME: ${{ secrets.NEO4J_USERNAME }}
+                  NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+                  LANGCHAIN_TRACING_V2: "true"
+                  LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
+                  LANGCHAIN_PROJECT: "rootalpha-ci-${{ github.ref_name }}"
+              # Run evaluation with a strict quality gate threshold of 0.82
+              # This will fail the build (exit code 1) if average scores fall below this.
+              run: |
+                  uv run rootalpha-eval --testset evals/datasets/eval_testset.json --fail-under 0.82
+
+            - name: Generate Publication-grade Statistical Insights Report
+              run: |
+                  uv run python evals/report.py --csv evals/results/eval_results.csv --output evals/results/evaluation_report.md
+
+            - name: Upload Insights Report as Artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: rag-evaluation-report
+                  path: evals/results/evaluation_report.md
+
+            - name: Verify package build
+              run: |
+                  uv build --wheel

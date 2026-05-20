@@ -1,5 +1,5 @@
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
-from agent.query.message_utils import (
+from query.agent_query.message_utils import (
     normalize_question,
     content_to_text,
     messages_from_input_payload,

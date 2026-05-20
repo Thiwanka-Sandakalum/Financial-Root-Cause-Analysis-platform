@@ -1,0 +1,1 @@
+"""FastAPI Ingestion Pipeline Module"""

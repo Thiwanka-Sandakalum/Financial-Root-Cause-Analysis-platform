@@ -1,5 +1,5 @@
-from ingestion.parser import ParsedSection
-from ingestion.chunker import chunk_section, chunk_document
+from ingestion.pipeline.parser import ParsedSection
+from ingestion.pipeline.chunker import chunk_section, chunk_document
 
 
 def test_chunk_section():

@@ -9,7 +9,7 @@
         "pydantic>=2.7.0"
     ],
     "graphs": {
-        "rootalpha": "./agent/query/main.py:graph"
+        "rootalpha": "./query/agent_query/main.py:graph"
     },
     "env": ".env"
 }

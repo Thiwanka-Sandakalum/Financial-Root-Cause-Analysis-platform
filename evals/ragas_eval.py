@@ -44,7 +44,7 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from neo4j import GraphDatabase
 
-from agent.query import build_query_graph
+from query.agent_query.graph import build_query_graph
 from graph.schema import create_schema
 
 # ── default test questions (no reference answers → limited metrics) ──────────

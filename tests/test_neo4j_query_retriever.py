@@ -1,5 +1,5 @@
 from unittest.mock import MagicMock, patch
-from retrieval.neo4j_query_retriever import (
+from query.core.neo4j_query_retriever import (
     retrieve_chunk_documents,
     expand_graph_context,
     _normalize_text,
@@ -25,7 +25,7 @@ def test_retriever_doc():
     }
 
 
-@patch("retrieval.neo4j_query_retriever._SEARCH_VECTOR_SUPPORTED", None)
+@patch("query.core.neo4j_query_retriever._SEARCH_VECTOR_SUPPORTED", None)
 def test_retrieve_chunk_documents_and_fallback():
     mock_driver = MagicMock()
     mock_session = MagicMock()

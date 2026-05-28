@@ -43,6 +43,7 @@ from typing import cast
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from neo4j import GraphDatabase
+import pandas as pd
 
 from query.agent_query.graph import build_query_graph
 from graph.schema import create_schema
@@ -65,6 +66,89 @@ DEFAULT_QUESTIONS: list[dict] = [
         "period": None,
     },
 ]
+
+EXPECTED_DOMAIN_VALUES = {"financial_supported", "non_financial"}
+
+
+def _normalize_expected_domain(raw: object) -> str:
+    if not isinstance(raw, str):
+        return ""
+    value = raw.strip().lower()
+    if value in EXPECTED_DOMAIN_VALUES:
+        return value
+    return ""
+
+
+def _infer_expected_domain(case: dict) -> str:
+    explicit = _normalize_expected_domain(case.get("expected_domain"))
+    if explicit:
+        return explicit
+
+    category = str(case.get("category") or "").strip().lower()
+    if category in {"robustness", "non_financial", "out_of_scope"}:
+        return "non_financial"
+    return "financial_supported"
+
+
+def _state_diagnostics(state: dict) -> dict:
+    final_answer = state.get("final_answer") or {}
+    citations = final_answer.get("citations") if isinstance(final_answer, dict) else []
+    if not isinstance(citations, list):
+        citations = []
+    evidence = state.get("evidence") or []
+    if not isinstance(evidence, list):
+        evidence = []
+
+    retrieval_quality = state.get("retrieval_quality") or {}
+    if not isinstance(retrieval_quality, dict):
+        retrieval_quality = {}
+
+    evaluation_signals = state.get("evaluation_signals") or {}
+    if not isinstance(evaluation_signals, dict):
+        evaluation_signals = {}
+
+    policy_flags = state.get("policy_flags") or {}
+    if not isinstance(policy_flags, dict):
+        policy_flags = {}
+
+    domain_status = state.get("domain_status")
+    if not isinstance(domain_status, str):
+        domain_status = ""
+
+    domain_reason = policy_flags.get("domain_reason")
+    if not isinstance(domain_reason, str):
+        domain_reason = ""
+
+    domain_confidence = policy_flags.get("domain_confidence")
+    if not isinstance(domain_confidence, str):
+        domain_confidence = ""
+
+    domain_signals = policy_flags.get("domain_signals")
+    if isinstance(domain_signals, list):
+        domain_signals_text = ", ".join(str(item).strip() for item in domain_signals if str(item).strip())
+    else:
+        domain_signals_text = ""
+
+    return {
+        "retry_count": int(state.get("retry_count") or 0),
+        "error_class": state.get("error_class") or "",
+        "blocked_reason": state.get("blocked_reason") or "",
+        "domain_status": domain_status,
+        "domain_gate_passed": bool(policy_flags.get("domain_gate_passed") or False),
+        "domain_confidence": domain_confidence,
+        "domain_reason": domain_reason,
+        "domain_signals": domain_signals_text,
+        "domain_adjudication_used": bool(policy_flags.get("domain_adjudication_used") or False),
+        "retrieval_evidence_count": int(retrieval_quality.get("evidence_count") or len(evidence)),
+        "retrieval_avg_score": float(retrieval_quality.get("avg_score") or 0.0),
+        "citation_count": len(citations),
+        "citation_coverage": float(evaluation_signals.get("citation_coverage") or 0.0),
+        "answer_confidence": str(evaluation_signals.get("confidence") or final_answer.get("confidence") or ""),
+        "claim_support_ratio": float(evaluation_signals.get("claim_support_ratio") or 0.0),
+        "claim_total_count": int(evaluation_signals.get("claim_total_count") or 0),
+        "unsupported_claim_count": int(evaluation_signals.get("unsupported_claim_count") or 0),
+        "confidence_overridden": bool(evaluation_signals.get("confidence_overridden") or False),
+    }
 
 
 def _context_strings(state: dict) -> list[str]:
@@ -93,15 +177,16 @@ def run_graph(graph, question: str, ticker: str | None, period: str | None) -> d
             "table_hits": [],
             "graph_paths": [],
             "evidence": [],
-            "gaps": [],
+            "retry_count": 0,
         },
         config={"configurable": {"thread_id": f"eval-{hash(question)}"}},
     )
 
 
-def build_dataset(graph, test_cases: list[dict]) -> tuple[list[dict], bool]:
+def build_dataset(graph, test_cases: list[dict]) -> tuple[list[dict], bool, list[dict]]:
     """Run every test case through the graph and build a RAGAS sample list."""
     samples: list[dict] = []
+    diagnostics: list[dict] = []
     has_reference = False
 
     for i, case in enumerate(test_cases, 1):
@@ -122,8 +207,55 @@ def build_dataset(graph, test_cases: list[dict]) -> tuple[list[dict], bool]:
             has_reference = True
 
         samples.append(sample)
+        diagnostics.append(_state_diagnostics(state))
 
-    return samples, has_reference
+    return samples, has_reference, diagnostics
+
+
+def _compute_domain_gate_summary(df: pd.DataFrame) -> dict[str, float | int]:
+    if df.empty or "expected_domain" not in df.columns:
+        return {}
+
+    labels = df["expected_domain"].fillna("").astype(str).str.strip().str.lower()
+    valid_mask = labels.isin(EXPECTED_DOMAIN_VALUES)
+    if not valid_mask.any():
+        return {}
+
+    eval_df = df.loc[valid_mask].copy()
+    eval_labels = labels.loc[valid_mask]
+    blocked_reason = eval_df.get("blocked_reason", pd.Series([""] * len(eval_df))).fillna("").astype(str)
+
+    blocked = blocked_reason != ""
+    predicted_non_financial = blocked
+    actual_non_financial = eval_labels == "non_financial"
+
+    tp = int((predicted_non_financial & actual_non_financial).sum())
+    fp = int((predicted_non_financial & ~actual_non_financial).sum())
+    tn = int((~predicted_non_financial & ~actual_non_financial).sum())
+    fn = int((~predicted_non_financial & actual_non_financial).sum())
+
+    total = int(len(eval_df))
+    accuracy = (tp + tn) / total if total else 0.0
+    precision = tp / (tp + fp) if (tp + fp) else 0.0
+    recall = tp / (tp + fn) if (tp + fn) else 0.0
+    f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
+
+    false_block_rate = fp / int((~actual_non_financial).sum()) if int((~actual_non_financial).sum()) else 0.0
+    false_allow_rate = fn / int(actual_non_financial.sum()) if int(actual_non_financial.sum()) else 0.0
+
+    return {
+        "labeled_samples": total,
+        "accuracy": accuracy,
+        "precision_non_financial": precision,
+        "recall_non_financial": recall,
+        "f1_non_financial": f1,
+        "false_block_rate": false_block_rate,
+        "false_allow_rate": false_allow_rate,
+        "tp": tp,
+        "fp": fp,
+        "tn": tn,
+        "fn": fn,
+    }
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -235,7 +367,7 @@ def main(argv: list[str] | None = None) -> None:
 
     # ── collect answers + contexts ────────────────────────────────────────────
     print("\nRunning graph on test cases...")
-    samples, has_reference = build_dataset(graph, test_cases)
+    samples, has_reference, diagnostics = build_dataset(graph, test_cases)
     driver.close()
 
     # ── build RAGAS EvaluationDataset ─────────────────────────────────────────
@@ -345,10 +477,17 @@ def main(argv: list[str] | None = None) -> None:
     # ── per-question breakdown → CSV ──────────────────────────────────────────
     try:
         df = result.to_pandas()
+        if diagnostics and len(diagnostics) == len(df):
+            diag_df = pd.DataFrame(diagnostics)
+            df = pd.concat([df, diag_df], axis=1)
         # attach category if present in test cases
         categories = [c.get("category", "") for c in test_cases]
         if len(categories) == len(df):
             df.insert(0, "category", categories)
+        expected_domain = [_infer_expected_domain(c) for c in test_cases]
+        if len(expected_domain) == len(df):
+            insert_at = 1 if "category" in df.columns else 0
+            df.insert(insert_at, "expected_domain", expected_domain)
         os.makedirs("evals/results", exist_ok=True)
         csv_path = "evals/results/eval_results.csv"
         df.to_csv(csv_path, index=False)
@@ -364,6 +503,25 @@ def main(argv: list[str] | None = None) -> None:
                 "reference",
                 "retrieved_contexts",
                 "category",
+                "expected_domain",
+                "retry_count",
+                "error_class",
+                "blocked_reason",
+                "domain_status",
+                "domain_gate_passed",
+                "domain_confidence",
+                "domain_reason",
+                "domain_signals",
+                "domain_adjudication_used",
+                "retrieval_evidence_count",
+                "retrieval_avg_score",
+                "citation_count",
+                "citation_coverage",
+                "answer_confidence",
+                "claim_support_ratio",
+                "claim_total_count",
+                "unsupported_claim_count",
+                "confidence_overridden",
             )
         ]
         if metric_cols:
@@ -372,6 +530,22 @@ def main(argv: list[str] | None = None) -> None:
                 if col in df.columns and df[col].notna().any():
                     worst = df.loc[df[col].idxmin()]
                     print(f"  {col}: {worst['user_input'][:80]}  → {worst[col]:.4f}")
+
+        domain_summary = _compute_domain_gate_summary(df)
+        if domain_summary:
+            print("\nDomain Gate QA Summary (labeled):")
+            print(f"  labeled_samples: {int(domain_summary['labeled_samples'])}")
+            print(f"  accuracy: {float(domain_summary['accuracy']):.4f}")
+            print(f"  precision_non_financial: {float(domain_summary['precision_non_financial']):.4f}")
+            print(f"  recall_non_financial: {float(domain_summary['recall_non_financial']):.4f}")
+            print(f"  f1_non_financial: {float(domain_summary['f1_non_financial']):.4f}")
+            print(f"  false_block_rate: {float(domain_summary['false_block_rate']):.4f}")
+            print(f"  false_allow_rate: {float(domain_summary['false_allow_rate']):.4f}")
+
+            summary_path = "evals/results/domain_gate_summary.json"
+            with open(summary_path, "w", encoding="utf-8") as f:
+                json.dump(domain_summary, f, indent=2)
+            print(f"Domain gate summary saved to: {summary_path}")
     except Exception as exc:
         print(f"\n(Could not export per-question CSV: {exc})")
 

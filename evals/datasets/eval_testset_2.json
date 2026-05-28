@@ -4,13 +4,15 @@
     "question": "What was NVIDIA total revenue in Q2 FY2025 compared to Q1 FY2025 and Q2 FY2024?",
     "reference": "NVIDIA total revenue in Q2 FY2025 was $30.0 billion, up 15% from Q1 FY2025 and up 122% from Q2 FY2024.",
     "ticker": "NVDA",
-    "period": "Q2 FY2025"
+    "period": "Q2 FY2025",
+    "expected_domain": "financial_supported"
   },
   {
     "category": "revenue_segment",
     "question": "What was NVIDIA Data Center revenue in Q2 FY2025 and what drove its growth?",
     "reference": "Data Center revenue in Q2 FY2025 was a record $26.3 billion, up 16% from Q1 FY2025 and up 154% from Q2 FY2024. Growth was driven by demand for the Hopper GPU computing platform for training and inferencing of large language models, recommendation engines, and generative AI applications.",
     "ticker": "NVDA",
-    "period": "Q2 FY2025"
+    "period": "Q2 FY2025",
+    "expected_domain": "financial_supported"
   }
 ]

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import re
-
 def state_dict(value: object) -> dict:
 	if hasattr(value, "model_dump"):
 		return value.model_dump()  # type: ignore[no-any-return]
@@ -57,27 +55,3 @@ def evidence_item(doc: dict) -> dict:
 		"ticker": meta.get("ticker"),
 		"text": doc.get("page_content", ""),
 	}
-
-def table_has_multi_period_comparison(evidence: list[dict]) -> bool:
-	period_pattern = re.compile(r"\bq[1-4]\s*fy\s*\d{2,4}\b", re.IGNORECASE)
-
-	for item in evidence:
-		if item.get("source_type") != "table":
-			continue
-
-		text = (item.get("text") or "").lower()
-		if not text:
-			continue
-
-		period_tokens = {
-			token.upper().replace(" ", "") for token in period_pattern.findall(text)
-		}
-		if len(period_tokens) >= 2:
-			return True
-
-		has_qoq = "q/q" in text or "previous quarter" in text
-		has_yoy = "y/y" in text or "year ago" in text
-		if has_qoq and has_yoy:
-			return True
-
-	return False

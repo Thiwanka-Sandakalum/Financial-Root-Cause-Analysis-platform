@@ -85,3 +85,16 @@ def test_question_from_state():
 
     # 6. Fallback empty
     assert question_from_state({}) == ""
+
+
+def test_question_from_state_prefers_latest_human_message_over_stale_question_key():
+    state = {
+        "question": "Old turn question",
+        "messages": [
+            HumanMessage(content="Turn 1 question"),
+            AIMessage(content="Turn 1 answer"),
+            HumanMessage(content="Turn 2 fresh question"),
+        ],
+    }
+
+    assert question_from_state(state) == "Turn 2 fresh question"

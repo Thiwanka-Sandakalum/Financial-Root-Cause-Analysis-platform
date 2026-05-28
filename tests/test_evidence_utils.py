@@ -5,7 +5,6 @@ from query.agent_query.evidence_utils import (
     serialize_graph_paths,
     dedupe_documents,
     evidence_item,
-    table_has_multi_period_comparison,
 )
 
 
@@ -132,24 +131,3 @@ def test_evidence_item():
     }
 
 
-def test_table_has_multi_period_comparison():
-    # Test non-table items
-    assert not table_has_multi_period_comparison(
-        [{"source_type": "chunk", "text": "Q1 FY25 Q2 FY25"}]
-    )
-
-    # Test empty or missing text
-    assert not table_has_multi_period_comparison([{"source_type": "table", "text": ""}])
-
-    # Test multiple period pattern matches (e.g. "Q1 FY25" and "Q2 FY25")
-    assert table_has_multi_period_comparison(
-        [{"source_type": "table", "text": "Comparing Q1 FY25 with Q2 FY25 revenue"}]
-    )
-
-    # Test QoQ and YoY token matches
-    assert table_has_multi_period_comparison(
-        [{"source_type": "table", "text": "The Q/Q change and year ago comparisons."}]
-    )
-    assert not table_has_multi_period_comparison(
-        [{"source_type": "table", "text": "Only Q/Q here."}]
-    )

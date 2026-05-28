@@ -1,5 +1,6 @@
 """Document management routes."""
 import uuid
+from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
@@ -11,6 +12,30 @@ from ingestion.api.models import DocumentUploadRequest, DocumentResponse, ListDo
 from ingestion.api.exceptions import DocumentNotFoundError
 
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
+
+_UPLOAD_CHUNK_BYTES = 1024 * 1024
+_UPLOAD_DIR = Path(__file__).resolve().parents[3] / "data" / "uploads"
+
+
+async def _persist_upload(file: UploadFile, doc_id: str) -> tuple[str, int]:
+    """Persist an uploaded file and return its absolute path and byte size."""
+    original_name = file.filename or ""
+    suffix = Path(original_name).suffix
+    _UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+    stored_path = _UPLOAD_DIR / f"{doc_id}{suffix}"
+    size_bytes = 0
+
+    with stored_path.open("wb") as out_file:
+        while True:
+            chunk = await file.read(_UPLOAD_CHUNK_BYTES)
+            if not chunk:
+                break
+            out_file.write(chunk)
+            size_bytes += len(chunk)
+
+    await file.seek(0)
+    return str(stored_path), size_bytes
 
 
 @router.post("/upload", response_model=dict, status_code=201)
@@ -38,13 +63,21 @@ async def upload_document(
     Returns:
         Document upload confirmation with optional job ID
     """
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Uploaded file must have a filename")
+
     doc_id = str(uuid.uuid4())
+    file_path, size_bytes = await _persist_upload(file, doc_id)
+    mime_type = file.content_type or "application/octet-stream"
     
     # Create document in Neo4j
     await create_document(
         driver=driver,
         doc_id=doc_id,
         filename=file.filename or "unknown",
+        file_path=file_path,
+        mime_type=mime_type,
+        size_bytes=size_bytes,
         ticker=company_ticker,
         company_name=company_name,
         doc_type=doc_type,

@@ -2,9 +2,11 @@ import os
 import random
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Callable, List, Literal, TypeVar
 
 from langchain_google_genai import ChatGoogleGenerativeAI
+from dotenv import load_dotenv
 from llama_cloud import LlamaCloud
 from llama_cloud.types.parsing_get_response import (
     MarkdownPageMarkdownResultPage,
@@ -13,8 +15,22 @@ from llama_cloud.types.parsing_get_response import (
 from pydantic import BaseModel
 
 
-_client = LlamaCloud()
+_client: LlamaCloud | None = None
 T = TypeVar("T")
+
+
+def _load_ingestion_env() -> None:
+    """Load the ingestion API env file for direct library/CLI usage."""
+    env_path = Path(__file__).resolve().parents[1] / "api" / ".env"
+    load_dotenv(env_path, override=False)
+
+
+def _get_client() -> LlamaCloud:
+    global _client
+    if _client is None:
+        _load_ingestion_env()
+        _client = LlamaCloud()
+    return _client
 
 
 class SectionSpan(BaseModel):
@@ -161,13 +177,15 @@ def parse_financial_pdf(
                         named financial sections, replacing all regex detection logic.
     Phase 3 — Assemble: Page slices are joined per SectionSpan into ParsedSection objects.
     """
+    client = _get_client()
+
     # Upload and parse synchronously (SDK handles job polling internally)
     file_obj = _retry_call(
-        lambda: _client.files.create(file=pdf_path, purpose="parse"),
+        lambda: client.files.create(file=pdf_path, purpose="parse"),
         context=f"LlamaCloud file upload for {pdf_path}",
     )
     result = _retry_call(
-        lambda: _client.parsing.parse(
+        lambda: client.parsing.parse(
             file_id=file_obj.id,
             tier="agentic",
             version="latest",

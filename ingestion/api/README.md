@@ -2,6 +2,8 @@
 
 FastAPI implementation of the document ingestion and knowledge graph pipeline following best practices for clean architecture, separation of concerns, and maintainability.
 
+For the full ingestion system design, see [../ARCHITECTURE.md](../ARCHITECTURE.md).
+
 ## Architecture Overview
 
 ```

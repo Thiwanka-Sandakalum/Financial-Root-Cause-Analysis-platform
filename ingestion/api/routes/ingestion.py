@@ -1,17 +1,25 @@
 """Ingestion pipeline routes."""
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from neo4j import AsyncDriver
 
 from ingestion.api.db_helpers import (
     create_job,
+    get_documents_for_ingestion,
     get_job,
     list_jobs,
     update_job_status,
 )
-from ingestion.api.dependencies import get_neo4j_driver, get_llm, get_embedder
+from ingestion.api.dependencies import (
+    get_cached_settings,
+    get_neo4j_driver,
+    get_llm,
+    get_embedder,
+)
+from ingestion.api.config import Settings
 from ingestion.api.models import (
     IngestionRequest,
     JobResponse,
@@ -31,6 +39,7 @@ async def start_ingestion(
     request: IngestionRequest,
     background_tasks: BackgroundTasks,
     driver: AsyncDriver = Depends(get_neo4j_driver),
+    settings: Settings = Depends(get_cached_settings),
     llm = Depends(get_llm),
     embedder = Depends(get_embedder),
 ) -> JobStartResponse:
@@ -47,6 +56,45 @@ async def start_ingestion(
     Returns:
         Job creation confirmation
     """
+    documents = await get_documents_for_ingestion(driver, request.document_ids)
+    missing_ids = [doc_id for doc_id in request.document_ids if doc_id not in documents]
+    if missing_ids:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "message": "Some document IDs were not found",
+                "missing_document_ids": missing_ids,
+            },
+        )
+
+    missing_paths = [
+        doc_id
+        for doc_id in request.document_ids
+        if not documents[doc_id].get("file_path")
+    ]
+    if missing_paths:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Some documents do not have a persisted file path",
+                "invalid_document_ids": missing_paths,
+            },
+        )
+
+    missing_files = [
+        doc_id
+        for doc_id in request.document_ids
+        if not Path(documents[doc_id]["file_path"]).exists()
+    ]
+    if missing_files:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Some document files are missing on disk",
+                "invalid_document_ids": missing_files,
+            },
+        )
+
     job_id = await create_job(
         driver=driver,
         document_ids=request.document_ids,
@@ -57,6 +105,10 @@ async def start_ingestion(
         ingest_pipeline_task,
         job_id=job_id,
         document_ids=request.document_ids,
+        document_rows=[documents[doc_id] for doc_id in request.document_ids],
+        neo4j_uri=settings.neo4j_uri,
+        neo4j_username=settings.neo4j_username,
+        neo4j_password=settings.neo4j_password,
         driver=driver,
         llm=llm,
         embedder=embedder,

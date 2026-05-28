@@ -64,9 +64,8 @@ def _write_document_company(
 ):
     tx.run(
         """
-        MERGE (c:Company {ticker: $ticker})
-        ON CREATE SET c.name = $name
-        ON MATCH SET c.name = coalesce(c.name, $name)
+        MERGE (c:Company {name: $name})
+        SET c.ticker = coalesce(c.ticker, $ticker)
         MERGE (d:Document {id: $doc_id})
         SET d.type = $doc_type,
             d.period = $period,

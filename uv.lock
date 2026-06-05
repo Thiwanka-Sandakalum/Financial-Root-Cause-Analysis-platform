@@ -1187,6 +1187,15 @@ wheels = [
 ]
 
 [[package]]
+name = "json-repair"
+version = "0.60.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3d/df/eaf26d1c0095b9fc429c8ac2365ddb7d0ebb1a869bf9c705294520d88b24/json_repair-0.60.0.tar.gz", hash = "sha256:089dc286ec27ce6a7b85c61184a9d7b4023cbce626d1db0105ff26311d6d15af", size = 49393, upload-time = "2026-06-03T10:51:03.889Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a3/d3/18308b46e50967f8a0120c67c80289284eac6af3716a34979313a5565cfd/json_repair-0.60.0-py3-none-any.whl", hash = "sha256:c6874564942e6706b2653cd7e4b4896a881a016a6e087ba4837f19415cde0cb3", size = 47965, upload-time = "2026-06-03T10:51:02.508Z" },
+]
+
+[[package]]
 name = "jsonpatch"
 version = "1.33"
 source = { registry = "https://pypi.org/simple" }
@@ -1814,6 +1823,27 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ce/f4/aaa4ac19adae4b01bc742b63afd2672a77e7351566f02721e713e4b863ee/neo4j-6.2.0.tar.gz", hash = "sha256:e1e246b65b572bd8ea97f9e0e721b7d40a5ce53e53d0007c29aef63e4f9124d9", size = 241459, upload-time = "2026-05-04T07:35:41.428Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e6/cf/1c3795866cefaac6e648d4e98c373cafd97810f6e317c307371007ab4abb/neo4j-6.2.0-py3-none-any.whl", hash = "sha256:b87abdd13a5cc2e3bd51026926c2f20ac38fa3febe98c340520dce19e97388d0", size = 327824, upload-time = "2026-05-04T07:35:39.604Z" },
+]
+
+[[package]]
+name = "neo4j-graphrag"
+version = "1.17.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fsspec" },
+    { name = "json-repair" },
+    { name = "neo4j" },
+    { name = "numpy", marker = "python_full_version < '3.15'" },
+    { name = "pydantic" },
+    { name = "pypdf" },
+    { name = "pyyaml" },
+    { name = "scipy", marker = "python_full_version < '3.15'" },
+    { name = "tenacity" },
+    { name = "types-pyyaml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/91/35/ca153393545ba59d72cbb41cdfa373e873051c974ff19093bbf8f7867471/neo4j_graphrag-1.17.0.tar.gz", hash = "sha256:c95077a3b0a750dfbeaa89a6bb4c78ce3501053dc7ca0848504514e9bfa32570", size = 1347096, upload-time = "2026-05-27T13:36:29.375Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/45/24/d4daf9b9d3ec8f45a6995f2b52ec061e81d109bb08df749802fbf6732b7b/neo4j_graphrag-1.17.0-py3-none-any.whl", hash = "sha256:87c1b41859032f1ac9a4d6a2fa29375e38aabc3d6d240f6b6ede8622aaae030d", size = 262348, upload-time = "2026-05-27T13:36:27.291Z" },
 ]
 
 [[package]]
@@ -2659,6 +2689,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pypdf"
+version = "6.12.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0a/6d/20879428577c1e57ecd41b69dc86beabf43db9287ad2e702207f8b48c751/pypdf-6.12.2.tar.gz", hash = "sha256:111669eb6680c04495ae0c113a1476e3bf93a95761d23c7406b591c80a6490b1", size = 6468184, upload-time = "2026-05-26T13:31:26.911Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9e/44/fee070a16639d9869bb6a7e0f3a1b3946da1d66f32b9260b4d19cb90d7b2/pypdf-6.12.2-py3-none-any.whl", hash = "sha256:67b2699357a1f3f4c945940ea80826349ee507c9e2577724a14b4941982c104d", size = 343865, upload-time = "2026-05-26T13:31:25.068Z" },
+]
+
+[[package]]
 name = "pytest"
 version = "9.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -2969,6 +3008,7 @@ dependencies = [
     { name = "langsmith" },
     { name = "llama-cloud" },
     { name = "neo4j" },
+    { name = "neo4j-graphrag" },
     { name = "pandas" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -2997,7 +3037,8 @@ requires-dist = [
     { name = "langgraph-cli", extras = ["inmem"], specifier = ">=0.4.0" },
     { name = "langsmith", specifier = ">=0.1.95" },
     { name = "llama-cloud", specifier = ">=0.1.8" },
-    { name = "neo4j", specifier = ">=5.24.0" },
+    { name = "neo4j", specifier = ">=5.24.0,<7.0.0" },
+    { name = "neo4j-graphrag", specifier = ">=1.16.0" },
     { name = "pandas", specifier = ">=2.2.0" },
     { name = "pydantic", specifier = ">=2.7.0" },
     { name = "pydantic-settings", specifier = ">=2.3.0" },
@@ -3360,6 +3401,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e4/51/9aed62104cea109b820bbd6c14245af756112017d309da813ef107d42e7e/typer-0.25.1.tar.gz", hash = "sha256:9616eb8853a09ffeabab1698952f33c6f29ffdbceb4eaeecf571880e8d7664cc", size = 122276, upload-time = "2026-04-30T19:32:16.964Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3f/f9/2b3ff4e56e5fa7debfaf9eb135d0da96f3e9a1d5b27222223c7296336e5f/typer-0.25.1-py3-none-any.whl", hash = "sha256:75caa44ed46a03fb2dab8808753ffacdbfea88495e74c85a28c5eefcf5f39c89", size = 58409, upload-time = "2026-04-30T19:32:18.271Z" },
+]
+
+[[package]]
+name = "types-pyyaml"
+version = "6.0.12.20260518"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b8/83/4a1afc3fbfcf5b8d46fc390cd95ed6b0dc9010a265f4e9f46314efffa37a/types_pyyaml-6.0.12.20260518.tar.gz", hash = "sha256:d917f83fb38462550338c1297faedd860b3ec83912b96b1e3d73255f7473e466", size = 17850, upload-time = "2026-05-18T06:01:58.675Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/06/a2/c01db32be2ae7d6a1689972f3c492b149ee4e164b12fdfd9f64b50888215/types_pyyaml-6.0.12.20260518-py3-none-any.whl", hash = "sha256:d2150f75a231c9fe9c7463bd29487d93e60bac90400287351384bc2284eba7cd", size = 20312, upload-time = "2026-05-18T06:01:57.368Z" },
 ]
 
 [[package]]

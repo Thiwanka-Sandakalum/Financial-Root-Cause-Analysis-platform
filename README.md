@@ -39,7 +39,7 @@ flowchart LR
     end
 
     subgraph Database Persistence
-        Neo4j[(Neo4j Graph Database)]
+        Neo4j[("Neo4j Graph Database")]
     end
 
     PDF --> LP
@@ -70,21 +70,21 @@ flowchart TD
         Node1 -->|Classify Domain/Ticker/Intent| Node2[2. Assess Readiness]
         Node2 -->|Check Missing Context| Node2Branch{Context Complete?}
         
-        Node2Branch -->|No| AskClarification([Halt: Suggest Ingestion / Ask User])
+        Node2Branch -->|No| AskClarification(["Halt: Suggest Ingestion / Ask User"])
         Node2Branch -->|Yes| Node3[3. Plan Retrieval Tools]
         
         Node3 -->|Select Chunks, Tables, or Graph Traversal| Node4[4. Retrieve with Tools]
         
         subgraph Neo4j Integration
-            Node4 -->|VectorCypherRetriever| VSearch[(Neo4j Vector Index)]
-            Node4 -->|Neighborhood Expansion| GTraversal[(Neo4j Graph Database)]
+            Node4 -->|VectorCypherRetriever| VSearch[("Neo4j Vector Index")]
+            Node4 -->|Neighborhood Expansion| GTraversal[("Neo4j Graph Database")]
         end
         
         VSearch & GTraversal -->|Retrieved Contexts| Node5[5. Merge & Rank Evidence]
         Node5 --> Node6[6. Quality Gate Node]
         
         Node6 -->|Verify Scores & Chunk Counts| GateBranch{Meets Thresholds?}
-        GateBranch -->|No: Lower Scores| FailFallback([Fallback: Insufficient Context])
+        GateBranch -->|No: Lower Scores| FailFallback(["Fallback: Insufficient Context"])
         GateBranch -->|Yes| Node7[7. Synthesize Answer]
         
         subgraph Safety & Grounding
@@ -96,7 +96,7 @@ flowchart TD
     end
     
     AnswerBlock & AnswerApprove --> Node8[8. Build Visualization Spec]
-    Node8 --> FinalOutput([Response + Chart JSON])
+    Node8 --> FinalOutput(["Response + Chart JSON"])
 ```
 
 ### C. System Production Cloud Architecture
@@ -109,12 +109,12 @@ flowchart TD
         ReactUI[React / Frontend App]
     end
 
-    subgraph Cloud Gateway & Hosting (GCP)
+    subgraph "Cloud Gateway & Hosting (GCP)"
         LB[Cloud Load Balancer]
-        Static[Firebase Hosting / GCS Static Bucket]
+        Static["Firebase Hosting / GCS Static Bucket"]
     end
 
-    subgraph Backend Application Tier (GCP Cloud Run)
+    subgraph "Backend Application Tier (GCP Cloud Run)"
         subgraph FastAPI Web Service
             API[FastAPI Container]
             LGServer[LangGraph Server]
@@ -126,8 +126,8 @@ flowchart TD
     end
 
     subgraph Storage & Data Tier
-        GCS[(Google Cloud Storage: Raw PDFs)]
-        Neo4jAura[(Neo4j AuraDB Enterprise)]
+        GCS[("Google Cloud Storage: Raw PDFs")]
+        Neo4jAura[("Neo4j AuraDB Enterprise")]
     end
 
     subgraph AI/ML & Cognitive Services
@@ -136,8 +136,8 @@ flowchart TD
     end
 
     subgraph Observability & Operations
-        LSmith[LangSmith / Arize Phoenix Tracing]
-        CloudLogging[GCP Cloud Logging & Monitoring]
+        LSmith["LangSmith / Arize Phoenix Tracing"]
+        CloudLogging["GCP Cloud Logging & Monitoring"]
     end
 
     UserBrowser -->|HTTPS| LB
@@ -174,27 +174,27 @@ flowchart TD
 This project implements industry-standard engineering practices and a modern AI toolchain:
 
 ### Core Frameworks & Language
-* **Python 3.11:** The programming baseline for safety, asynchronous bindings, and syntax clarity.
-* **FastAPI & Uvicorn:** Async REST endpoints for pipeline orchestration and frontend interface support.
+* **Python 3.11** ![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white): The programming baseline for safety, asynchronous bindings, and syntax clarity.
+* **FastAPI & Uvicorn** ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) ![Uvicorn](https://img.shields.io/badge/Uvicorn-purple?style=flat-square): Async REST endpoints for pipeline orchestration and frontend interface support.
 
 ### Agentic Orchestration & RAG
-* **LangGraph:** Orchestrates our deterministic state machine, enabling complex routing, retries, and cycle mitigation.
-* **LangChain & `langchain-google-genai`:** Provides structured bindings, tools setup, and integrations for Google LLMs.
-* **`neo4j-graphrag` (VectorCypherRetriever):** Merges vector searches with graph-relational queries, enriching semantic matches with structural graph context.
+* **LangGraph** ![LangGraph](https://img.shields.io/badge/LangGraph-orange?style=flat-square) & **LangChain** ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=flat-square&logo=chainlink&logoColor=white): Orchestrates our deterministic state machine, enabling complex routing, retries, and cycle mitigation.
+* **`neo4j-graphrag` (VectorCypherRetriever)** ![Neo4j](https://img.shields.io/badge/Neo4j-008CC1?style=flat-square&logo=neo4j&logoColor=white) ![RAG](https://img.shields.io/badge/RAG-blue?style=flat-square): Merges vector searches with graph-relational queries, enriching semantic matches with structural graph context.
 
 ### Ingest & Parsing Pipeline
-* **LlamaParse (Llama Cloud):** Advanced API-based parser used to classify document layout sections and isolate complex financial tables.
-* **`gemini-embedding-001` / `text-embedding-004` (Vertex AI):** Projects narratives and tabular data into 768-dimensional vector spaces.
+* **LlamaParse (Llama Cloud)** ![LlamaParse](https://img.shields.io/badge/LlamaParse-black?style=flat-square): Advanced API-based parser used to classify document layout sections and isolate complex financial tables.
+* **Vertex AI** ![Vertex AI](https://img.shields.io/badge/Vertex_AI-4285F4?style=flat-square&logo=google-cloud&logoColor=white) (`gemini-2.5-flash` / `text-embedding-004`): Projects narratives and tabular data into 768-dimensional vector spaces and performs reasoning.
 
 ### Database & Storage
-* **Neo4j Enterprise Graph Database:** Powers causal modeling (`CAUSED`, `IMPACTED`, `DEPENDS_ON`), document structures (`CONTAINS`), and vector indexing.
-* **Google Cloud Storage (GCS):** Acts as the landing zone for raw financial PDF documents in production.
+* **Neo4j Enterprise Graph Database** ![Neo4j](https://img.shields.io/badge/Neo4j-008CC1?style=flat-square&logo=neo4j&logoColor=white): Powers causal modeling (`CAUSED`, `IMPACTED`, `DEPENDS_ON`), document structures (`CONTAINS`), and vector indexing.
+* **Google Cloud Storage (GCS)** ![GCS](https://img.shields.io/badge/GCS-4285F4?style=flat-square&logo=google-cloud-storage&logoColor=white): Acts as the landing zone for raw financial PDF documents in production.
 
-### Evaluation & Observability
-* **Ragas & Pandas:** Evaluates context recall, faithfulness, and answer relevance on a synthetic/curated test suite.
-* **LangSmith & Arize Phoenix:** Distributed tracing, logging, and token usage accounting.
-* **Pytest & Pytest-asyncio:** Implements unit and integration test suites.
-* **Ruff & Mypy:** Static checking, formatting, and linting tools.
+### Evaluation, Observability & Tooling
+* **Ragas** ![Ragas](https://img.shields.io/badge/Ragas-FF6F61?style=flat-square) & **Pandas** ![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat-square&logo=pandas&logoColor=white): Evaluates context recall, faithfulness, and answer relevance on a synthetic/curated test suite.
+* **LangSmith** ![LangSmith](https://img.shields.io/badge/LangSmith-orange?style=flat-square) & **Arize Phoenix** ![Arize Phoenix](https://img.shields.io/badge/Phoenix-blue?style=flat-square): Distributed tracing, logging, and token usage accounting.
+* **Docker** ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white): Containerizes the application stack for local execution and production cloud deployments.
+* **Pytest** ![Pytest](https://img.shields.io/badge/Pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white): Implements unit and integration test suites.
+* **Ruff** ![Ruff](https://img.shields.io/badge/Ruff-black?style=flat-square) & **Mypy** ![Mypy](https://img.shields.io/badge/Mypy-blue?style=flat-square): Static checking, formatting, and linting tools.
 
 ---
 

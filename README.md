@@ -1,220 +1,248 @@
-# RootAlpha Financial Root-Cause Analysis Platform
+<div align="center">
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11-blue.svg" alt="Python">
-  <img src="https://img.shields.io/badge/LangGraph-Agentic_Workflow-orange.svg" alt="LangGraph">
-  <img src="https://img.shields.io/badge/Neo4j-Graph_Database-blue.svg" alt="Neo4j">
-  <img src="https://img.shields.io/badge/Vertex_AI-Gemini_2.5_Flash-green.svg" alt="Vertex AI">
-  <img src="https://img.shields.io/badge/LlamaParse-PDF_Parsing-yellow.svg" alt="LlamaParse">
-</p>
+# RootAlpha
 
-A production-grade, multi-agent AI framework utilizing **GraphRAG** to ingest complex financial quarterly reports, map causal entity relationships, and generate structurally grounded, numerically verified risk assessments.
+**Multi-Agent GraphRAG Platform for Financial Root-Cause Analysis**
+
+[![Python](https://img.shields.io/badge/Python_3.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![LangGraph](https://img.shields.io/badge/LangGraph-FF6F00?style=flat-square&logoColor=white)](https://langchain-ai.github.io/langgraph/)
+[![Neo4j](https://img.shields.io/badge/Neo4j_Enterprise-008CC1?style=flat-square&logo=neo4j&logoColor=white)](https://neo4j.com)
+[![Vertex AI](https://img.shields.io/badge/Vertex_AI-4285F4?style=flat-square&logo=googlecloud&logoColor=white)](https://cloud.google.com/vertex-ai)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
+[![License](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
+
+Ingests dense quarterly reports → builds a causal knowledge graph → returns numerically-verified root-cause analysis in under **15 seconds**.
+
+</div>
 
 ---
 
-## 1. System Architecture Diagrams
+## Overview
 
-This system decouples knowledge graph construction (Ingestion) from user query execution (LangGraph Query Agent), using Neo4j as the single source of truth to power hybrid semantic and relational searches.
+### The Problem
 
-### A. Ingestion Pipeline Architecture
-This pipeline parses raw PDFs, classifies financial sections, chunk-embeds narratives, extracts domain-specific entities, and constructs the Neo4j Knowledge Graph.
+Every quarter, financial analysts and investors face the same grind: a company publishes a 120-page report — Management Discussion, Risk Factors, Footnotes, Financial Statements — and somewhere buried across those sections is the real story. Why did gross margin compress 4 points? Was it raw material costs, a product mix shift, or a one-time write-down? Answering that requires jumping between sections, cross-referencing numbers, and manually tracing the chain of events that led to the outcome.
+
+That process routinely takes **hours per report** — and it breaks down entirely when you're tracking multiple companies across multiple quarters.
+
+Generic AI tools make it worse, not better. They confidently cite numbers that aren't in the document, miss causal connections that span sections, and give no way to verify where an answer came from.
+
+---
+
+### What RootAlpha Does
+
+RootAlpha reads a quarterly report the way a senior analyst would — except in seconds, not hours. It understands that a revenue miss isn't just a number: it's the downstream effect of a supplier disruption, a regional slowdown, or a currency headwind mentioned three sections earlier. It maps those cause-and-effect relationships explicitly, so every answer it gives can be traced back to a specific passage or data point in the source document.
+
+More importantly: **if a number can't be verified against the document, RootAlpha won't say it.** It hard-blocks ungrounded claims and tells you so — rather than presenting a confident-sounding hallucination.
+
+---
+
+### Who It's For
+
+| Persona | Use Case |
+|---|---|
+| 📊 **Buy-side / Sell-side Analysts** | Rapid root-cause drill-down on earnings misses, margin shifts, and guidance changes across a portfolio of companies |
+| 🏦 **Investment Research Teams** | Automated first-pass analysis on newly released 10-Qs and 10-Ks before human review |
+| ⚖️ **Risk & Compliance Officers** | Systematic extraction and tracking of disclosed risk factors and their financial impact across quarters |
+| 🔍 **Due Diligence Teams** | Cross-document causal mapping during M&A or credit underwriting — tracing how macro events flow through to balance sheet metrics |
+
+---
+
+### Pain Points Solved
+
+**→ Hours of manual cross-referencing, eliminated**
+Drop in a quarterly report and ask a plain-English question. RootAlpha surfaces the answer — with the source evidence — in under 15 seconds.
+
+**→ Hallucinated numbers, blocked**
+A built-in grounding check verifies every numeric claim against the retrieved document context before the answer is returned. Unverified claims trigger a safe fallback, not a confident lie.
+
+**→ Disconnected insights, connected**
+Most tools treat a report as a pile of text chunks. RootAlpha builds a causal graph — linking metrics to events, events to macro conditions, and conditions to disclosed risks — so you can ask *why* something happened, not just *what* happened.
+
+**→ Opaque AI reasoning, made auditable**
+Every answer traces back to specific sections and passages in the source document. No black box. No "trust me."
+
+---
+
+## How It Works
+
+RootAlpha runs in two stages. First, a **graph ingestion pipeline** parses the raw PDF, classifies its sections, and constructs a structured knowledge graph in Neo4j — preserving not just the text, but the relationships between entities (companies, metrics, events, risk factors). Second, a **LangGraph query agent** receives a natural-language question, retrieves the most relevant context from that graph, enforces a quality gate, verifies numeric grounding, and synthesizes a final answer.
+
+---
+
+## Architecture
+
+### ☁️ Cloud Architecture
+
+A highly-available GCP deployment with containerized microservices, secure VPC networking, and Cloud Storage as the PDF landing zone.
+
+![Cloud Architecture](docs/diagrams/arct_diagram.png)
+
+---
+
+<details>
+<summary><strong>📄 Ingestion Pipeline</strong> — click to expand</summary>
+<br>
+
+Parses PDFs → classifies sections → chunk-embeds narratives and tables → writes structured graph nodes to Neo4j.
 
 ```mermaid
-flowchart TB
-    PDF[PDF] --> LP[LlamaParse]
-    LP --> Classify[Classifier]
-    Classify --> Narrative[Narrative Split]
-    Classify --> Tables[Tables]
-    Narrative --> Embed[Embedding]
-    Tables --> Embed
-    Embed --> DBWriter[Cypher Writer]
-    DBWriter --> Neo4j[(Neo4j)]
+flowchart LR
+    PDF["📄 PDF"] --> LP["LlamaParse"]
+    LP --> CL["Classifier"]
+    CL --> NR["Narrative Split"]
+    CL --> TB["Tables"]
+    NR & TB --> EM["text-embedding-004\n768-dim Vectors"]
+    EM --> CW["Cypher Writer"]
+    CW --> NEO[("Neo4j\nGraph DB")]
 ```
 
-### B. Query Agent & RAG Pipeline (LangGraph Workflow)
-A state-driven workflow capable of cyclic self-correction, strict semantic/relational retrieval, and automated quality gate enforcement.
+</details>
+
+<details>
+<summary><strong>🤖 Query Agent — LangGraph State Machine</strong> — click to expand</summary>
+<br>
+
+A cyclic, self-correcting workflow with a strict quality gate and numeric grounding check enforced before any answer is returned.
 
 ```mermaid
 flowchart TD
-    User([User Prompt]) --> State[State Initialization]
-    
-    subgraph LangGraph Agentic Controller
-        State --> Node1[1. Analyze Request]
-        Node1 -->|Classify Domain/Ticker/Intent| Node2[2. Assess Readiness]
-        Node2 -->|Check Missing Context| Node2Branch{Context Complete?}
-        
-        Node2Branch -->|No| AskClarification(["Halt: Suggest Ingestion / Ask User"])
-        Node2Branch -->|Yes| Node3[3. Plan Retrieval Tools]
-        
-        Node3 -->|Select Chunks, Tables, or Graph Traversal| Node4[4. Retrieve with Tools]
-        
-        subgraph Neo4j Integration
-            Node4 -->|VectorCypherRetriever| VSearch[("Neo4j Vector Index")]
-            Node4 -->|Neighborhood Expansion| GTraversal[("Neo4j Graph Database")]
+    User(["User Prompt"]) --> State["State Initialization"]
+
+    subgraph LangGraph ["LangGraph Agentic Controller"]
+        State --> N1["1 · Analyze Request"]
+        N1 --> N2["2 · Assess Readiness"]
+        N2 --> B1{"Context\nComplete?"}
+
+        B1 -- No --> Halt(["Halt · Suggest Ingestion"])
+        B1 -- Yes --> N3["3 · Plan Retrieval"]
+        N3 --> N4["4 · Retrieve"]
+
+        subgraph Neo4j ["Neo4j Integration"]
+            N4 --> VS[("Vector Index\nVectorCypherRetriever")]
+            N4 --> GT[("Graph Traversal\nNeighborhood Expansion")]
         end
-        
-        VSearch & GTraversal -->|Retrieved Contexts| Node5[5. Merge & Rank Evidence]
-        Node5 --> Node6[6. Quality Gate Node]
-        
-        Node6 -->|Verify Scores & Chunk Counts| GateBranch{Meets Thresholds?}
-        GateBranch -->|No: Lower Scores| FailFallback(["Fallback: Insufficient Context"])
-        GateBranch -->|Yes| Node7[7. Synthesize Answer]
-        
-        subgraph Safety & Grounding
-            Node7 --> Diagnostics[Numeric Claim Diagnostics]
-            Diagnostics --> SupportBranch{Support Ratio >= 40%?}
-            SupportBranch -->|No| AnswerBlock[Safe Grounding Fallback]
-            SupportBranch -->|Yes| AnswerApprove[Final Answer Synthesis]
+
+        VS & GT --> N5["5 · Merge & Rank Evidence"]
+        N5 --> N6["6 · Quality Gate"]
+        N6 --> B2{"Meets\nThresholds?"}
+
+        B2 -- No --> Fallback(["Fallback · Insufficient Context"])
+        B2 -- Yes --> N7["7 · Synthesize Answer"]
+
+        subgraph Grounding ["Safety & Grounding"]
+            N7 --> Diag["Numeric Claim Diagnostics"]
+            Diag --> B3{"Support\nRatio ≥ 40%?"}
+            B3 -- No --> Safe["Safe Grounding Fallback"]
+            B3 -- Yes --> Final["Final Answer Synthesis"]
         end
     end
-    
-    AnswerBlock & AnswerApprove --> Node8[8. Build Visualization Spec]
-    Node8 --> FinalOutput(["Response + Chart JSON"])
+
+    Safe & Final --> N8["8 · Build Visualization Spec"]
+    N8 --> Out(["Response + Chart JSON"])
 ```
 
-### C. System Production Cloud Architecture
-A highly available, production-grade cloud layout utilizing Google Cloud Platform (GCP) and containerized microservices to guarantee scalability, isolation, and secure connections.
-
-![ARCT Diagram](docs/diagrams/arct_diagram.png)
+</details>
 
 ---
 
-## 2. Business Problem & Solution Impact
+## Stack
 
-**Problem:** Financial analysts and investors spend hours manually cross-referencing dense, 100+ page quarterly reports (MD&A, Notes, Financials) to identify root causes behind revenue shifts, risk factors, and metric fluctuations. Standard LLM approaches hallucinate numbers and fail to connect relational events.
-
-**Solution:** An autonomous GraphRAG system that parses documents into structured graphs, querying a localized Neo4j database to trace financial metrics back to their causal macro or micro events, returning numerically verified root-cause analysis in under 15 seconds.
-
----
-
-## 3. Technology Stack & Frameworks Used
-
-This project implements industry-standard engineering practices and a modern AI toolchain:
-
-### Core Frameworks & Language
-* **Python 3.11** ![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white): The programming baseline for safety, asynchronous bindings, and syntax clarity.
-* **FastAPI & Uvicorn** ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) ![Uvicorn](https://img.shields.io/badge/Uvicorn-purple?style=flat-square): Async REST endpoints for pipeline orchestration and frontend interface support.
-
-### Agentic Orchestration & RAG
-* **LangGraph** ![LangGraph](https://img.shields.io/badge/LangGraph-orange?style=flat-square) & **LangChain** ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=flat-square&logo=chainlink&logoColor=white): Orchestrates our deterministic state machine, enabling complex routing, retries, and cycle mitigation.
-* **`neo4j-graphrag` (VectorCypherRetriever)** ![Neo4j](https://img.shields.io/badge/Neo4j-008CC1?style=flat-square&logo=neo4j&logoColor=white) ![RAG](https://img.shields.io/badge/RAG-blue?style=flat-square): Merges vector searches with graph-relational queries, enriching semantic matches with structural graph context.
-
-### Ingest & Parsing Pipeline
-* **LlamaParse (Llama Cloud)** ![LlamaParse](https://img.shields.io/badge/LlamaParse-black?style=flat-square): Advanced API-based parser used to classify document layout sections and isolate complex financial tables.
-* **Vertex AI** ![Vertex AI](https://img.shields.io/badge/Vertex_AI-4285F4?style=flat-square&logo=google-cloud&logoColor=white) (`gemini-2.5-flash` / `text-embedding-004`): Projects narratives and tabular data into 768-dimensional vector spaces and performs reasoning.
-
-### Database & Storage
-* **Neo4j Enterprise Graph Database** ![Neo4j](https://img.shields.io/badge/Neo4j-008CC1?style=flat-square&logo=neo4j&logoColor=white): Powers causal modeling (`CAUSED`, `IMPACTED`, `DEPENDS_ON`), document structures (`CONTAINS`), and vector indexing.
-* **Google Cloud Storage (GCS)** ![GCS](https://img.shields.io/badge/GCS-4285F4?style=flat-square&logo=google-cloud-storage&logoColor=white): Acts as the landing zone for raw financial PDF documents in production.
-
-### Evaluation, Observability & Tooling
-* **Ragas** ![Ragas](https://img.shields.io/badge/Ragas-FF6F61?style=flat-square) & **Pandas** ![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat-square&logo=pandas&logoColor=white): Evaluates context recall, faithfulness, and answer relevance on a synthetic/curated test suite.
-* **LangSmith** ![LangSmith](https://img.shields.io/badge/LangSmith-orange?style=flat-square) & **Arize Phoenix** ![Arize Phoenix](https://img.shields.io/badge/Phoenix-blue?style=flat-square): Distributed tracing, logging, and token usage accounting.
-* **Docker** ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white): Containerizes the application stack for local execution and production cloud deployments.
-* **Pytest** ![Pytest](https://img.shields.io/badge/Pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white): Implements unit and integration test suites.
-* **Ruff** ![Ruff](https://img.shields.io/badge/Ruff-black?style=flat-square) & **Mypy** ![Mypy](https://img.shields.io/badge/Mypy-blue?style=flat-square): Static checking, formatting, and linting tools.
+| Layer | Technology |
+|---|---|
+| **Language** | ![Python](https://img.shields.io/badge/-Python_3.11-3776AB?style=flat-square&logo=python&logoColor=white) |
+| **API Server** | ![FastAPI](https://img.shields.io/badge/-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) ![Uvicorn](https://img.shields.io/badge/-Uvicorn-8B5CF6?style=flat-square) |
+| **Agent Orchestration** | ![LangGraph](https://img.shields.io/badge/-LangGraph-FF6F00?style=flat-square) ![LangChain](https://img.shields.io/badge/-LangChain-1C3C3C?style=flat-square&logo=chainlink&logoColor=white) |
+| **Graph Database** | ![Neo4j](https://img.shields.io/badge/-Neo4j_Enterprise-008CC1?style=flat-square&logo=neo4j&logoColor=white) — APOC · Vector Index · `VectorCypherRetriever` |
+| **Inference & Embeddings** | ![Vertex AI](https://img.shields.io/badge/-Vertex_AI-4285F4?style=flat-square&logo=googlecloud&logoColor=white) — `gemini-2.5-flash` · `text-embedding-004` (768-dim) |
+| **PDF Parsing** | ![LlamaParse](https://img.shields.io/badge/-LlamaParse-000000?style=flat-square) — layout classification · table isolation |
+| **Object Storage** | ![GCS](https://img.shields.io/badge/-Cloud_Storage-4285F4?style=flat-square&logo=googlecloud&logoColor=white) — PDF landing zone |
+| **Evaluation** | ![Ragas](https://img.shields.io/badge/-Ragas-FF6F61?style=flat-square) ![Pandas](https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white) |
+| **Observability** | ![LangSmith](https://img.shields.io/badge/-LangSmith-FF6F00?style=flat-square) ![Phoenix](https://img.shields.io/badge/-Arize_Phoenix-4F46E5?style=flat-square) |
+| **Containers** | ![Docker](https://img.shields.io/badge/-Docker-2496ED?style=flat-square&logo=docker&logoColor=white) ![Compose](https://img.shields.io/badge/-Compose-2496ED?style=flat-square&logo=docker&logoColor=white) |
+| **Testing & Linting** | ![Pytest](https://img.shields.io/badge/-Pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white) ![Ruff](https://img.shields.io/badge/-Ruff-D7FF64?style=flat-square&logoColor=black) ![Mypy](https://img.shields.io/badge/-Mypy-2A6DB2?style=flat-square) |
 
 ---
 
-## 4. Evaluation & Performance Metrics (Critical)
+## Evaluation
 
-Financial AI applications require strict anti-hallucination mechanisms. This system integrates custom **Numeric Claim Diagnostics** that parse generated outputs against retrieved evidence.
+RootAlpha enforces anti-hallucination at the numeric level. If fewer than **40%** of generated numeric claims are traceable to retrieved context, the system hard-blocks and returns a safe fallback.
 
-* **Numeric Grounding:** If the LLM generates numeric claims where less than 40% are found in the direct context, the system triggers a hard block and returns a safe fallback message.
-* **Performance Dashboard:**
-
-| Metric Evaluation | Target Goal | Optimization Strategy | Status |
+| Metric | Target | Strategy | Status |
 |---|---|---|---|
-| Numeric Grounding Ratio | > 0.90 | Extracted tables as dedicated graph nodes to preserve row/col associations. | ✅ Passed |
-| Context Relevance (GraphRAG) | > 0.85 | Hybrid Cypher queries fetching neighbor nodes (e.g. `MacroEvent -> IMPACTED -> Metric`). | ✅ Passed |
-| Average Graph Traversal Latency | < 3.00s | Cypher query indexing on Ticker & Document ID. | ⚠️ Optimizing |
-| Quality Gate Rejection Rate | < 5.0% | Strict LLM system prompt engineering & query expansion. | ✅ Passed |
+| Numeric Grounding Ratio | `> 0.90` | Tables stored as dedicated graph nodes preserving row/col structure | ✅ Passed |
+| Context Relevance (GraphRAG) | `> 0.85` | Hybrid Cypher with neighbor expansion — `MacroEvent → IMPACTED → Metric` | ✅ Passed |
+| Graph Traversal Latency | `< 3.00s` | Cypher index on Ticker & Document ID | ⚠️ Optimizing |
+| Quality Gate Rejection Rate | `< 5.0%` | Strict system prompt engineering + query expansion | ✅ Passed |
 
 ---
 
-## 5. Local Setup & Environment Configuration
+## Setup
 
-You can configure and run the entire ecosystem (Neo4j Graph Database, FastAPI Ingestion Server, and the LangGraph Agent Studio) either using **Docker & Docker Compose** (recommended) or in a **Native Virtual Environment**.
+> **Prerequisites:** Docker, `gcloud` CLI, a GCP project with Vertex AI enabled, and a LlamaParse API key.
 
-The pipeline integrates with **Google Cloud Vertex AI** for embedding and inference APIs. Ensure your Google Cloud credentials are configured.
+<details open>
+<summary><strong>Option A — Docker (Recommended)</strong></summary>
+<br>
 
-### Option A: Containerized Setup (Docker & Docker Compose)
+```bash
+# 1. Clone
+git clone https://github.com/your-username/financial-root-cause-analysis.git
+cd financial-root-cause-analysis
 
-This approach automatically spins up a local Neo4j database, pre-configured with APOC plugins, mounts your credentials, and starts the FastAPI ingestion service and LangGraph agent server.
+# 2. Configure environment
+cp .env.example .env
+# → Set GCP_PROJECT_ID and LLAMA_PARSE_API_KEY in .env
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/your-username/financial-root-cause-analysis.git
-   cd financial-root-cause-analysis
-   ```
+# 3. Authenticate GCP
+gcloud auth application-default login --project development-498315
 
-2. **Configure Environment Variables:**
-   ```bash
-   cp .env.example .env
-   # Open .env and specify your GCP Project ID and LlamaParse API Key.
-   ```
+# 4. Start all services (mounts ADC credentials from host)
+docker-compose up --build
+```
 
-3. **Authenticate Google Application Default Credentials (ADC):**
-   ```bash
-   # Ensure ADC credentials exist locally on your host machine
-   gcloud auth application-default login --project development-498315
-   ```
+| Service | URL |
+|---|---|
+| LangGraph Agent UI | http://localhost:8080 |
+| FastAPI Ingestion Docs | http://localhost:8000/docs |
+| Neo4j Browser | http://localhost:7474 — `neo4j` / `password123` |
 
-4. **Spin up the services:**
-   ```bash
-   # Mounts your ADC credentials from the host (~/.config/gcloud) into the containers
-   docker-compose up --build
-   ```
+</details>
 
-5. **Access the Services:**
-   * **LangGraph Agent Dev UI:** [http://localhost:8080](http://localhost:8080)
-   * **FastAPI Ingestion Server Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
-   * **Neo4j Browser Console:** [http://localhost:7474](http://localhost:7474) (Username: `neo4j`, Password: `password123`)
+<details>
+<summary><strong>Option B — Native Python</strong></summary>
+<br>
 
----
+```bash
+# 1. Install uv and sync dependencies
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync && source .venv/bin/activate
 
-### Option B: Native Setup (Local Python Env)
+# 2. Run a local Neo4j instance
+docker run --name rootalpha-neo4j \
+    -p 7474:7474 -p 7687:7687 \
+    -e NEO4J_AUTH=neo4j/password123 \
+    -e NEO4J_PLUGINS='["apoc"]' \
+    -d neo4j:5.24.0-community
 
-1. **Install Dependencies using uv:**
-   ```bash
-   # Install uv package manager if not present
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   
-   # Synchronize virtual env and dependencies
-   uv sync
-   source .venv/bin/activate
-   ```
+# 3. Authenticate GCP
+gcloud auth application-default login --project development-498315
 
-2. **Run a Local Neo4j Instance:**
-   Ensure Docker is running a standalone instance or use Neo4j Desktop:
-   ```bash
-   docker run \
-       --name rootalpha-neo4j \
-       -p 7474:7474 -p 7687:7687 \
-       -e NEO4J_AUTH=neo4j/password123 \
-       -e NEO4J_PLUGINS='["apoc"]' \
-       -d neo4j:5.24.0-community
-   ```
+# 4. Start the ingestion server
+python -m ingestion.api.run
 
-3. **Authenticate GCP Credentials:**
-   ```bash
-   gcloud auth application-default login --project development-498315
-   ```
+# 5. Start the LangGraph agent
+langgraph dev
+```
 
-4. **Start the FastAPI Ingestion Engine:**
-   ```bash
-   python -m ingestion.api.run
-   ```
-
-5. **Start the LangGraph Agent Server:**
-   ```bash
-   langgraph dev
-   ```
+</details>
 
 ---
 
-## 6. Engineering Trade-Offs & Future Scope
+## Design Decisions
 
-* **Graph Database vs. Pure Vector Store:** Switched the underlying knowledge base from a standard vector database (e.g., Pinecone) to Neo4j. *Trade-off:* Increased document ingestion and indexing latency significantly, but reduced LLM hallucinations regarding company structures and causal event chains by enabling explicit relationship traversal.
-* **LangGraph vs. Linear Chains:** Opted for a LangGraph state machine over basic LangChain pipelines. *Trade-off:* Higher boilerplate complexity and steeper learning curve, but allows for crucial "Quality Gate" nodes that intercept ungrounded outputs and force the agent to re-plan its retrieval strategy.
-* **Future Scope:** Implement multi-threading in the LangGraph retrieval nodes to execute the chunk vector search and Neo4j relational expansion concurrently rather than sequentially, targeting a 1.5s overall latency reduction. Explore transitioning from Vertex AI APIs to local quantized models (e.g., Llama 3) for fallback mechanisms to reduce external dependencies and cost.
+**Graph DB over Vector Store** — Replacing Pinecone with Neo4j increased ingestion latency but enabled explicit causal relationship traversal (`CAUSED`, `IMPACTED`, `DEPENDS_ON`), significantly reducing hallucinations in company structure and event-chain queries.
+
+**LangGraph over Linear Chains** — Higher boilerplate, but the state-machine model allows Quality Gate nodes to intercept ungrounded outputs mid-flight and force retrieval replanning — impossible with standard sequential pipelines.
+
+**Future Work** — Parallelize chunk-vector search and graph expansion in retrieval nodes (targeting −1.5s latency). Evaluate local quantized models (Llama 3) as Vertex AI fallbacks to reduce cost and external dependency.

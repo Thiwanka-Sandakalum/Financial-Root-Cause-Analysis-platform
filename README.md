@@ -20,42 +20,15 @@ This system decouples knowledge graph construction (Ingestion) from user query e
 This pipeline parses raw PDFs, classifies financial sections, chunk-embeds narratives, extracts domain-specific entities, and constructs the Neo4j Knowledge Graph.
 
 ```mermaid
-flowchart LR
-    subgraph Raw Source
-        PDF[quarterly-report.pdf]
-    end
-
-    subgraph Parser & Splitter
-        LP[LlamaParse API]
-        Classify[Section Classifier]
-        Narrative[Narrative Splitter]
-        Tables[Table Extractor]
-    end
-
-    subgraph Inference & Extraction
-        GeminiEmbed[Vertex AI text-embedding-004]
-        GeminiLLM[Vertex AI gemini-2.5-flash]
-        EntityExtract[LLM Entity & Relation Extractor]
-    end
-
-    subgraph Database Persistence
-        Neo4j[("Neo4j Graph Database")]
-    end
-
-    PDF --> LP
-    LP --> Classify
-    Classify -->|Narrative Text| Narrative
-    Classify -->|Structured Tables| Tables
-    
-    Narrative -->|Text Chunks| GeminiEmbed
-    Tables -->|Markdown Tables| GeminiEmbed
-    Narrative -->|Context Text| EntityExtract
-    GeminiLLM -->|Enforce Schema| EntityExtract
-    
-    GeminiEmbed -->|Vectors: 768d| DBWriter[Idempotent Cypher Writer]
-    EntityExtract -->|Typed Entities & Relations| DBWriter
-    
-    DBWriter -->|MERGE Nodes & Edges| Neo4j
+flowchart TB
+    PDF[PDF] --> LP[LlamaParse]
+    LP --> Classify[Classifier]
+    Classify --> Narrative[Narrative Split]
+    Classify --> Tables[Tables]
+    Narrative --> Embed[Embedding]
+    Tables --> Embed
+    Embed --> DBWriter[Cypher Writer]
+    DBWriter --> Neo4j[(Neo4j)]
 ```
 
 ### B. Query Agent & RAG Pipeline (LangGraph Workflow)
@@ -102,62 +75,7 @@ flowchart TD
 ### C. System Production Cloud Architecture
 A highly available, production-grade cloud layout utilizing Google Cloud Platform (GCP) and containerized microservices to guarantee scalability, isolation, and secure connections.
 
-```mermaid
-flowchart TD
-    subgraph Client Tier
-        UserBrowser([User Browser])
-        ReactUI[React / Frontend App]
-    end
-
-    subgraph "Cloud Gateway & Hosting (GCP)"
-        LB[Cloud Load Balancer]
-        Static["Firebase Hosting / GCS Static Bucket"]
-    end
-
-    subgraph "Backend Application Tier (GCP Cloud Run)"
-        subgraph FastAPI Web Service
-            API[FastAPI Container]
-            LGServer[LangGraph Server]
-        end
-        
-        subgraph Ingestion Worker Service
-            Worker[Ingestion Cloud Run Job]
-        end
-    end
-
-    subgraph Storage & Data Tier
-        GCS[("Google Cloud Storage: Raw PDFs")]
-        Neo4jAura[("Neo4j AuraDB Enterprise")]
-    end
-
-    subgraph AI/ML & Cognitive Services
-        VertexAI[Google Cloud Vertex AI]
-        LlamaCloud[LlamaParse API Cloud]
-    end
-
-    subgraph Observability & Operations
-        LSmith["LangSmith / Arize Phoenix Tracing"]
-        CloudLogging["GCP Cloud Logging & Monitoring"]
-    end
-
-    UserBrowser -->|HTTPS| LB
-    LB --> Static
-    LB --> API
-    
-    ReactUI -->|API Requests| API
-    API <--> LGServer
-    
-    GCS -->|Trigger Pub/Sub| Worker
-    Worker -->|1. Parse Document| LlamaCloud
-    Worker -->|2. Generate Embeddings & Entities| VertexAI
-    Worker -->|3. Construct Graph| Neo4jAura
-    
-    LGServer -->|Hybrid Vector + Cypher Query| Neo4jAura
-    LGServer -->|Gemini Inference & Embeddings| VertexAI
-    
-    LGServer -->|Telemetry & Tracing| LSmith
-    API & Worker -->|Stdout Logs| CloudLogging
-```
+![ARCT Diagram](docs/diagrams/arct_diagram.png)
 
 ---
 

@@ -23,6 +23,7 @@ dependencies = [
   "python-multipart>=0.0.9", # Evaluation
   "ragas>=0.2.0",
   "pandas>=2.2.0",
+  "langgraph-api>=0.10.0",
 ]
 description = "RootAlpha GraphRAG pipeline and evaluation tooling"
 name = "rootalpha"
@@ -31,12 +32,12 @@ requires-python = ">=3.11"
 version = "0.1.0"
 
 [project.scripts]
-rootalpha-api = "ingestion.api.main:app"
 rootalpha-eval = "evals.ragas_eval:main"
 rootalpha-eval-default = "evals.commands:eval_default"
 rootalpha-eval-ref = "evals.commands:eval_reference"
 rootalpha-eval-ref-trace = "evals.commands:eval_reference_trace"
 rootalpha-query-api = "query.api.main:app"
+rootalpha-ingestion-api = "ingestion.api.main:start"
 
 [tool.hatch.build.targets.wheel]
 packages = [

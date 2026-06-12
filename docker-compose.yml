@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Neo4j Graph Database
   neo4j:
-    image: neo4j:5.24.0-community
+    image: neo4j:5.24.0
     container_name: rootalpha-neo4j
     ports:
       - "7474:7474" # Neo4j Browser (HTTP)

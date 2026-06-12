@@ -1,7 +1,10 @@
 """Main FastAPI application factory."""
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
+import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -12,6 +15,13 @@ from ingestion.api.routes.ingestion import router as ingestion_router
 
 
 logger = logging.getLogger(__name__)
+
+
+def _load_env() -> None:
+    """Load the project root .env file."""
+    env_path = Path(__file__).resolve().parents[2] / ".env"
+    load_dotenv(env_path, override=False)
+
 
 
 @asynccontextmanager
@@ -76,3 +86,8 @@ def create_app() -> FastAPI:
 
 # Create application instance
 app = create_app()
+
+def start():
+    """Run the API server."""
+    _load_env()
+    uvicorn.run("ingestion.api.main:app", host="0.0.0.0", port=8000, reload=True)

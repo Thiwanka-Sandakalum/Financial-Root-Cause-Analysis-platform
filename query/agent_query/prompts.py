@@ -162,6 +162,7 @@ ANSWER_PROMPT = ChatPromptTemplate.from_messages(
 			"5) Include one bullet per distinct insight or metric; aim for 3-8 non-duplicative bullets.\n"
 			"6) If evidence is insufficient or conflicting, state uncertainty and list open questions.\n"
 			"7) Confidence should reflect evidence quality and coverage.\n"
+			"8) Markdown Styling: Use rich Markdown styling to make the answer and bullets scannable. Highlight the most valuable information using **bold** text, specifically focusing on the exact metrics, dates, entities, and root causes the user asked about.\n"
 			"Return only the structured output that matches the schema.",
 		),
 		(

@@ -1,7 +1,6 @@
 from query.agent_query.graph import create_query_graph
+from dotenv import load_dotenv
 
-# Some other code
-def some_function():
-	pass
+load_dotenv()
 
 graph = create_query_graph()

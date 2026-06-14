@@ -60,7 +60,7 @@ def _normalize_name(name: str) -> str:
 
 
 def _write_document_company(
-    tx, company_ticker, company_name, doc_id, doc_type, fiscal_period, filename
+    tx, company_ticker, company_name, doc_id, doc_type, fiscal_period, filename, file_path
 ):
     tx.run(
         """
@@ -69,7 +69,8 @@ def _write_document_company(
         MERGE (d:Document {id: $doc_id})
         SET d.type = $doc_type,
             d.period = $period,
-            d.filename = $filename
+            d.filename = $filename,
+            d.file_path = $file_path
         MERGE (c)-[:FILED]->(d)
         """,
         ticker=company_ticker,
@@ -78,6 +79,7 @@ def _write_document_company(
         doc_type=doc_type,
         period=fiscal_period,
         filename=filename,
+        file_path=file_path,
     )
 
 
@@ -344,6 +346,7 @@ def ingest_document(
             doc_type,
             fiscal_period,
             path.name,
+            str(path.absolute()),
         )
         session.execute_write(_write_sections, doc_id, section_rows)
         session.execute_write(_write_chunks, chunk_rows)

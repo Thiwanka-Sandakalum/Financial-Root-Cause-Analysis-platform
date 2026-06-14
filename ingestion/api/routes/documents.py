@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from neo4j import AsyncDriver
 
 from ingestion.api.db_helpers import create_document
@@ -140,11 +141,11 @@ async def list_documents(
         filename: d.filename,
         ticker: d.ticker,
         company_name: d.company_name,
-        doc_type: d.doc_type,
+        doc_type: coalesce(d.doc_type, d.type),
         period: d.period,
         created_at: d.created_at,
-        status: d.status,
-        stats: d.stats
+        status: coalesce(d.status, 'UPLOADED'),
+        stats: coalesce(d.stats, {{}})
     }} as doc_data
     ORDER BY d.created_at DESC
     SKIP $offset
@@ -159,7 +160,7 @@ async def list_documents(
         total = count_record.get("total", 0) if count_record else 0
 
         list_result = await session.run(list_query, params)
-        records = await list_result.all()
+        records = await list_result.data()
 
     documents = [DocumentResponse(**record.get("doc_data")) for record in records]
 
@@ -196,11 +197,11 @@ async def get_document(
         filename: d.filename,
         ticker: d.ticker,
         company_name: d.company_name,
-        doc_type: d.doc_type,
+        doc_type: coalesce(d.doc_type, d.type),
         period: d.period,
         created_at: d.created_at,
-        status: d.status,
-        stats: d.stats
+        status: coalesce(d.status, 'UPLOADED'),
+        stats: coalesce(d.stats, {})
     } as doc_data
     """
 
@@ -212,6 +213,44 @@ async def get_document(
         raise DocumentNotFoundError(doc_id)
 
     return DocumentResponse(**record.get("doc_data"))
+
+
+@router.get("/{doc_id}/content", response_class=FileResponse)
+async def get_document_content(
+    doc_id: str,
+    driver: AsyncDriver = Depends(get_neo4j_driver),
+) -> FileResponse:
+    """
+    Serve the raw document file (e.g., PDF).
+    
+    Args:
+        doc_id: Document ID
+        driver: Neo4j driver
+        
+    Returns:
+        FileResponse containing the physical file
+        
+    Raises:
+        DocumentNotFoundError: If document not found in DB
+        HTTPException: If file is physically missing on disk
+    """
+    query = """
+    MATCH (d:Document {id: $doc_id})
+    RETURN d.file_path as file_path
+    """
+
+    async with driver.session() as session:
+        result = await session.run(query, doc_id=doc_id)
+        record = await result.single()
+
+    if not record or not record.get("file_path"):
+        raise DocumentNotFoundError(doc_id)
+
+    file_path = record.get("file_path")
+    if not file_path or not Path(file_path).exists():
+        raise HTTPException(status_code=404, detail="File physically missing on server")
+
+    return FileResponse(file_path)
 
 
 @router.delete("/{doc_id}", status_code=204)

@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class DocumentStatus(str, Enum):
@@ -66,13 +66,18 @@ class DocumentResponse(BaseModel):
     
     id: str
     filename: str
-    ticker: str
-    company_name: str
-    doc_type: str
-    period: str
-    created_at: datetime
-    status: DocumentStatus
-    stats: Dict = Field(default_factory=dict)
+    ticker: Optional[str] = None
+    company_name: Optional[str] = None
+    doc_type: Optional[str] = None
+    period: Optional[str] = None
+    created_at: Optional[datetime] = None
+    status: Optional[DocumentStatus] = None
+    stats: Optional[Dict] = Field(default_factory=dict)
+
+    @field_validator("stats", mode="before")
+    @classmethod
+    def default_stats(cls, v):
+        return v or {}
 
 
 class JobErrorResponse(BaseModel):

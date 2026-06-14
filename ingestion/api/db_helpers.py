@@ -180,13 +180,16 @@ async def list_jobs(
     Returns:
         Tuple of (total_count, jobs)
     """
-    where_clause = "WHERE j:Job"
+    match_clause = "MATCH (j:Job)"
+    where_clause = ""
+    params = {}
     if status:
-        where_clause += f" AND j.status = '{status}'"
+        where_clause = " WHERE j.status = $status"
+        params["status"] = status
 
-    count_query = f"{where_clause} RETURN count(j) as total"
+    count_query = f"{match_clause}{where_clause} RETURN count(j) as total"
     list_query = f"""
-    {where_clause}
+    {match_clause}{where_clause}
     RETURN {{
         id: j.id,
         status: j.status,
@@ -199,17 +202,19 @@ async def list_jobs(
         stats: j.stats
     }} as job_data
     ORDER BY j.created_at DESC
-    SKIP {offset}
-    LIMIT {limit}
+    SKIP $offset
+    LIMIT $limit
     """
+    params["offset"] = offset
+    params["limit"] = limit
 
     async with driver.session() as session:
-        count_result = await session.run(count_query)
+        count_result = await session.run(count_query, params)
         count_record = await count_result.single()
         total = count_record.get("total", 0) if count_record else 0
 
-        list_result = await session.run(list_query)
-        records = await list_result.all()
+        list_result = await session.run(list_query, params)
+        records = await list_result.data()
 
     jobs = []
     for record in records:

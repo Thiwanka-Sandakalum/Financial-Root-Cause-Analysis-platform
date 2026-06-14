@@ -101,6 +101,7 @@ READINESS_PROMPT = ChatPromptTemplate.from_messages(
 			"Decide one answer_mode: answer, clarify, or request_ingestion.\n"
 			"Choose clarify when the request is underspecified (missing year, period, scope, or metric disambiguation).\n"
 			"Choose request_ingestion only when the request is valid but likely requires data not present in filings in scope (for example live market value/current valuation).\n"
+			"CRITICAL: Annual Reports often contain extensive Management Discussion and Analysis (MD&A) which includes strategic outlooks, segment breakdowns, payback periods, and internal metrics like LTV/CAC. DO NOT reject these questions. Always choose answer to let the retrieval engine attempt to find it in the ingested MD&A chunks.\n"
 			"Choose answer when request is sufficiently specified for retrieval from filings context.\n"
 			"For clarify: provide up to 3 targeted clarification questions.\n"
 			"For request_ingestion: provide concrete ingestion recommendations and ask user to re-ask after ingestion.\n"

@@ -46,7 +46,7 @@ OPTIONAL MATCH (node)-[:NEXT_CHUNK]->(next:Chunk)
 OPTIONAL MATCH (node)-[:MENTIONS]->(entity)
 OPTIONAL MATCH (entity)-[rel:CAUSED|IMPACTED|DEPENDS_ON|REPORTED_BY|HAS_EXECUTIVE]->(other)
 WITH node, score, s, d, c, prev, next, entity, rel, other
-WHERE ($ticker IS NULL OR c.ticker = $ticker)
+WHERE ($ticker IS NULL OR toUpper(c.ticker) = toUpper($ticker))
   AND ($time_filter IS NULL OR d.period CONTAINS $time_filter)
 WITH
 	node,
@@ -92,7 +92,7 @@ OPTIONAL MATCH (s:Section)-[:HAS_TABLE]->(node)
 OPTIONAL MATCH (d:Document)-[:CONTAINS]->(s)
 OPTIONAL MATCH (c:Company)-[:FILED]->(d)
 WITH node, score, s, d, c
-WHERE ($ticker IS NULL OR c.ticker = $ticker)
+WHERE ($ticker IS NULL OR toUpper(c.ticker) = toUpper($ticker))
   AND ($time_filter IS NULL OR d.period CONTAINS $time_filter)
 RETURN
 	coalesce(node.markdown, '') AS content,

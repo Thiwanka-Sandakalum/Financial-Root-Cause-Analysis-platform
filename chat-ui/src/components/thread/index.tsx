@@ -7,6 +7,7 @@ import { useState, FormEvent } from "react";
 import { Button } from "../ui/button";
 import { Checkpoint, Message } from "@langchain/langgraph-sdk";
 import { AssistantMessage, AssistantMessageLoading } from "./messages/ai";
+import { AgentInlineLoader } from "./agent-stepper";
 import { HumanMessage } from "./messages/human";
 import {
   DO_NOT_RENDER_ID_PREFIX,
@@ -20,6 +21,11 @@ import {
   PanelRightClose,
   SquarePen,
   LineChart,
+  Wrench,
+  FileSearch,
+  BarChart3,
+  Calculator,
+  ReceiptText,
 } from "lucide-react";
 import { useQueryState, parseAsBoolean } from "nuqs";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
@@ -76,7 +82,122 @@ function ScrollToBottom(props: { className?: string }) {
 
 
 
+const TOOL_PROMPTS: Record<string, string> = {
+  document_search: "SYSTEM DIRECTIVE: You are strictly required to invoke the Document Search retrieval tool to gather qualitative evidence from corporate filings, annual reports, or official press releases to accurately answer the user's query. Do not rely solely on your internal knowledge base.",
+  financial_metrics: "SYSTEM DIRECTIVE: You are strictly required to invoke the Financial Metrics tool to extract precise quantitative data (e.g., revenue, EBITDA, margins, CAPEX) from the structured financial database. Your answer must be strictly backed by this retrieved quantitative data.",
+  valuation: "SYSTEM DIRECTIVE: You are strictly required to invoke the Valuation Analysis tool. You must compute or retrieve valuation multiples, DCF components, or comparative company analysis data before attempting to answer the user's query.",
+  earnings: "SYSTEM DIRECTIVE: You are strictly required to invoke the Earnings Transcripts search tool to identify management commentary, Q&A insights, and forward-looking guidance from recent earnings calls before answering the user's query.",
+};
+
+type ToolId = keyof typeof TOOL_PROMPTS | null;
+
+function FinancialToolsMenu({
+  selectedTool,
+  onSelectTool,
+}: {
+  selectedTool: ToolId;
+  onSelectTool: (id: ToolId) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (id: ToolId) => {
+    onSelectTool(id);
+    setIsOpen(false);
+  };
+
+  const getTriggerIcon = () => {
+    switch (selectedTool) {
+      case "document_search":
+        return <FileSearch className="w-5 h-5 text-blue-500" />;
+      case "financial_metrics":
+        return <BarChart3 className="w-5 h-5 text-green-500" />;
+      case "valuation":
+        return <Calculator className="w-5 h-5 text-purple-500" />;
+      case "earnings":
+        return <ReceiptText className="w-5 h-5 text-orange-500" />;
+      default:
+        return <Wrench className="w-5 h-5" />;
+    }
+  };
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className={cn(
+          "text-gray-500 hover:text-gray-700 rounded-full transition-colors relative",
+          selectedTool && "bg-gray-100 dark:bg-gray-800 ring-2 ring-gray-200 dark:ring-gray-700"
+        )}
+        onClick={() => setIsOpen(!isOpen)}
+        title={selectedTool ? "Tool Selected" : "Select Tool"}
+      >
+        {getTriggerIcon()}
+      </Button>
+
+      {isOpen && (
+        <div className="absolute bottom-full left-0 mb-2 w-56 rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50 overflow-hidden dark:bg-gray-800 dark:ring-gray-700">
+          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-200">Financial Tools</p>
+            {selectedTool && (
+              <button 
+                onClick={() => handleSelect(null)}
+                className="text-xs text-red-500 hover:text-red-700 underline"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <div className="py-1">
+            <div 
+              onClick={() => handleSelect("document_search")}
+              className={cn("flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors", selectedTool === "document_search" && "bg-blue-50 dark:bg-blue-900/20")}
+            >
+              <FileSearch className="w-4 h-4 text-blue-500" />
+              Document Search
+            </div>
+            <div 
+              onClick={() => handleSelect("financial_metrics")}
+              className={cn("flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors", selectedTool === "financial_metrics" && "bg-green-50 dark:bg-green-900/20")}
+            >
+              <BarChart3 className="w-4 h-4 text-green-500" />
+              Financial Metrics
+            </div>
+            <div 
+              onClick={() => handleSelect("valuation")}
+              className={cn("flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors", selectedTool === "valuation" && "bg-purple-50 dark:bg-purple-900/20")}
+            >
+              <Calculator className="w-4 h-4 text-purple-500" />
+              Valuation Analysis
+            </div>
+            <div 
+              onClick={() => handleSelect("earnings")}
+              className={cn("flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors", selectedTool === "earnings" && "bg-orange-50 dark:bg-orange-900/20")}
+            >
+              <ReceiptText className="w-4 h-4 text-orange-500" />
+              Earnings Transcripts
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Thread() {
+  const [selectedTool, setSelectedTool] = useState<ToolId>(null);
   const [threadId, setThreadId] = useQueryState("threadId");
   const [chatHistoryOpen, setChatHistoryOpen] = useQueryState(
     "chatHistoryOpen",
@@ -143,10 +264,15 @@ export function Thread() {
     if (!input.trim() || isLoading) return;
     setFirstTokenReceived(false);
 
+    let finalInput = input;
+    if (selectedTool && TOOL_PROMPTS[selectedTool]) {
+      finalInput = `${input}\n\n[HIDDEN_TOOL_PROMPT_START]\n${TOOL_PROMPTS[selectedTool]}\n[HIDDEN_TOOL_PROMPT_END]`;
+    }
+
     const newHumanMessage: Message = {
       id: uuidv4(),
       type: "human",
-      content: input,
+      content: finalInput,
     };
 
     const toolMessages = ensureToolCallsHaveResponses(stream.messages);
@@ -312,10 +438,21 @@ export function Thread() {
             contentClassName="pt-8 pb-16  max-w-3xl mx-auto flex flex-col gap-4 w-full"
             content={
               <>
-                {messages
-                  .filter((m) => !m.id?.startsWith(DO_NOT_RENDER_ID_PREFIX))
-                  .map((message, index) =>
-                    message.type === "human" ? (
+                {(() => {
+                  const visibleMessages = messages.filter(
+                    (m) => !m.id?.startsWith(DO_NOT_RENDER_ID_PREFIX)
+                  );
+                  const lastHumanMessageIndex = visibleMessages
+                    .map((m) => m.type)
+                    .lastIndexOf("human");
+
+                  return visibleMessages.map((message, index) => {
+                    const isCurrentRun = index > lastHumanMessageIndex;
+                    if (isLoading && isCurrentRun) {
+                      return null;
+                    }
+
+                    return message.type === "human" ? (
                       <HumanMessage
                         key={message.id || `${message.type}-${index}`}
                         message={message}
@@ -328,8 +465,9 @@ export function Thread() {
                         isLoading={isLoading}
                         handleRegenerate={handleRegenerate}
                       />
-                    ),
-                  )}
+                    );
+                  });
+                })()}
                 {/* Special rendering case where there are no AI/tool messages, but there is an interrupt.
                     We need to render it outside of the messages list, since there are no messages to render */}
                 {hasNoAIOrToolMessages && !!stream.interrupt && (
@@ -340,8 +478,8 @@ export function Thread() {
                     handleRegenerate={handleRegenerate}
                   />
                 )}
-                {isLoading && !firstTokenReceived && (
-                  <AssistantMessageLoading />
+                {isLoading && (
+                  <AgentInlineLoader />
                 )}
               </>
             }
@@ -391,17 +529,7 @@ export function Thread() {
                     <div className="flex items-center justify-between p-2 pt-4">
                       <div>
                         <div className="flex items-center space-x-2">
-                          <Switch
-                            id="render-tool-calls"
-                            checked={hideToolCalls ?? false}
-                            onCheckedChange={setHideToolCalls}
-                          />
-                          <Label
-                            htmlFor="render-tool-calls"
-                            className="text-sm text-gray-600"
-                          >
-                            Hide Tool Calls
-                          </Label>
+                          <FinancialToolsMenu selectedTool={selectedTool} onSelectTool={setSelectedTool} />
                         </div>
                       </div>
                       {stream.isLoading ? (

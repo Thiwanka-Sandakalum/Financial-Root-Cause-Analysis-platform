@@ -89,7 +89,10 @@ const useTypedStream = useStream<
   }
 >;
 
-type StreamContextType = ReturnType<typeof useTypedStream>;
+type StreamContextType = ReturnType<typeof useTypedStream> & {
+  activeStep: string;
+  completedSteps: string[];
+};
 const StreamContext = createContext<StreamContextType | undefined>(undefined);
 
 async function sleep(ms = 4000) {
@@ -129,11 +132,77 @@ const StreamSession = ({
 }) => {
   const [threadId, setThreadId] = useQueryState("threadId");
   const { getThreads, setThreads } = useThreads();
+  
+  const [activeStep, setActiveStep] = useState<string>("");
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+
   const streamValue = useTypedStream({
     apiUrl,
     apiKey: apiKey ?? undefined,
     assistantId,
     threadId: threadId ?? null,
+    callerOptions: {
+      fetch: async (input, init) => {
+        const response = await fetch(input, init);
+        if (response.body && input.toString().includes("/stream")) {
+          const [stream1, stream2] = response.body.tee();
+          
+          (async () => {
+            const reader = stream1.getReader();
+            const decoder = new TextDecoder();
+            let buffer = "";
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+              
+              const parts = buffer.split(/\r?\n\r?\n/);
+              buffer = parts.pop() || "";
+              
+              for (const part of parts) {
+                const lines = part.split(/\r?\n/);
+                let eventType = "";
+                let dataContent = "";
+                
+                for (const line of lines) {
+                  if (line.startsWith("event:")) {
+                    eventType = line.substring(6).trim();
+                  } else if (line.startsWith("data:")) {
+                    dataContent += line.substring(5).trim();
+                  }
+                }
+                
+                if (eventType === "messages" && dataContent) {
+                  try {
+                    const parsed = JSON.parse(dataContent);
+                    if (Array.isArray(parsed) && parsed.length > 1) {
+                      const nodeName = parsed[1]?.langgraph_node;
+                      if (nodeName) {
+                        setActiveStep((current) => {
+                          if (current && current !== nodeName) {
+                            setCompletedSteps((prev) => 
+                              prev.includes(current) ? prev : [...prev, current]
+                            );
+                          }
+                          return nodeName;
+                        });
+                      }
+                    }
+                  } catch (e) {}
+                }
+              }
+            }
+          })().catch(console.error);
+
+          return new Response(stream2, {
+            headers: response.headers,
+            status: response.status,
+            statusText: response.statusText,
+          });
+        }
+        return response;
+      }
+    },
     onCustomEvent: (event, options) => {
       options.mutate((prev) => {
         const ui = uiMessageReducer(prev.ui ?? [], event);
@@ -147,6 +216,24 @@ const StreamSession = ({
       sleep().then(() => getThreads().then(setThreads).catch(console.error));
     },
   });
+
+  useEffect(() => {
+    if (!streamValue.isLoading) {
+      // Stream finished, mark active step as completed
+      setActiveStep((current) => {
+        if (current) {
+          setCompletedSteps((prev) => 
+            prev.includes(current) ? prev : [...prev, current]
+          );
+        }
+        return "";
+      });
+    } else {
+      // New stream started
+      setCompletedSteps([]);
+      setActiveStep("");
+    }
+  }, [streamValue.isLoading]);
 
   useEffect(() => {
     checkGraphStatus(apiUrl, apiKey).then((ok) => {
@@ -167,145 +254,24 @@ const StreamSession = ({
   }, [apiKey, apiUrl]);
 
   return (
-    <StreamContext.Provider value={streamValue}>
+    <StreamContext.Provider value={{ ...streamValue, activeStep, completedSteps }}>
       {children}
     </StreamContext.Provider>
   );
 };
 
-// Default values for the form
+// Default values for the local platform
 const DEFAULT_API_URL = "http://localhost:2024";
-const DEFAULT_ASSISTANT_ID = "agent";
+const DEFAULT_ASSISTANT_ID = "rootalpha";
 
 export const StreamProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  // Get environment variables
-  const envApiUrl: string | undefined = import.meta.env.VITE_API_URL;
-  const envAssistantId: string | undefined = import.meta.env.VITE_ASSISTANT_ID;
-  const envApiKey: string | undefined = import.meta.env.VITE_LANGSMITH_API_KEY;
-
-  // Use URL params with env var fallbacks
-  const [apiUrl, setApiUrl] = useQueryState("apiUrl", {
-    defaultValue: envApiUrl || "",
-  });
-  const [assistantId, setAssistantId] = useQueryState("assistantId", {
-    defaultValue: envAssistantId || "",
-  });
-
-  // For API key, use localStorage with env var fallback
-  const [apiKey, _setApiKey] = useState(() => {
-    const storedKey = getApiKey();
-    return storedKey || envApiKey || "";
-  });
-
-  const setApiKey = (key: string) => {
-    window.localStorage.setItem("lg:chat:apiKey", key);
-    _setApiKey(key);
-  };
-
-  // Determine final values to use, prioritizing URL params then env vars
-  const finalApiUrl = apiUrl || envApiUrl;
-  const finalAssistantId = assistantId || envAssistantId;
-
-  // If we're missing any required values, show the form
-  if (!finalApiUrl || !finalAssistantId) {
-    return (
-      <div className="flex items-center justify-center min-h-screen w-full p-4">
-        <div className="animate-in fade-in-0 zoom-in-95 flex flex-col border bg-background shadow-lg rounded-lg max-w-3xl">
-          <div className="flex flex-col gap-2 mt-14 p-6 border-b">
-            <div className="flex items-start flex-col gap-2">
-              <LangGraphLogoSVG className="h-7" />
-              <h1 className="text-xl font-semibold tracking-tight">
-                Agent Chat
-              </h1>
-            </div>
-            <p className="text-muted-foreground">
-              Welcome to Agent Chat! Before you get started, you need to enter
-              the URL of the deployment and the assistant / graph ID.
-            </p>
-          </div>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-
-              const form = e.target as HTMLFormElement;
-              const formData = new FormData(form);
-              const apiUrl = formData.get("apiUrl") as string;
-              const assistantId = formData.get("assistantId") as string;
-              const apiKey = formData.get("apiKey") as string;
-
-              setApiUrl(apiUrl);
-              setApiKey(apiKey);
-              setAssistantId(assistantId);
-
-              form.reset();
-            }}
-            className="flex flex-col gap-6 p-6 bg-muted/50"
-          >
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="apiUrl">
-                Deployment URL<span className="text-rose-500">*</span>
-              </Label>
-              <p className="text-muted-foreground text-sm">
-                This is the URL of your LangGraph deployment. Can be a local, or
-                production deployment.
-              </p>
-              <Input
-                id="apiUrl"
-                name="apiUrl"
-                className="bg-background"
-                defaultValue={apiUrl || DEFAULT_API_URL}
-                required
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="assistantId">
-                Assistant / Graph ID<span className="text-rose-500">*</span>
-              </Label>
-              <p className="text-muted-foreground text-sm">
-                This is the ID of the graph (can be the graph name), or
-                assistant to fetch threads from, and invoke when actions are
-                taken.
-              </p>
-              <Input
-                id="assistantId"
-                name="assistantId"
-                className="bg-background"
-                defaultValue={assistantId || DEFAULT_ASSISTANT_ID}
-                required
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="apiKey">LangSmith API Key</Label>
-              <p className="text-muted-foreground text-sm">
-                This is <strong>NOT</strong> required if using a local LangGraph
-                server. This value is stored in your browser's local storage and
-                is only used to authenticate requests sent to your LangGraph
-                server.
-              </p>
-              <PasswordInput
-                id="apiKey"
-                name="apiKey"
-                defaultValue={apiKey ?? ""}
-                className="bg-background"
-                placeholder="lsv2_pt_..."
-              />
-            </div>
-
-            <div className="flex justify-end mt-2">
-              <Button type="submit" size="lg">
-                Continue
-                <ArrowRight className="size-5" />
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
+  // Hardcode the configuration values for the bespoke financial platform
+  // This prevents the routing state from losing connection details.
+  const apiUrl = DEFAULT_API_URL;
+  const assistantId = DEFAULT_ASSISTANT_ID;
+  const apiKey = ""; // Bypassed for local development
 
   return (
     <StreamSession apiKey={apiKey} apiUrl={apiUrl} assistantId={assistantId}>

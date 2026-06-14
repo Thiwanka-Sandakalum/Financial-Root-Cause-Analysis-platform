@@ -5,6 +5,7 @@ import "./markdown-styles.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
+import rehypeRaw from "rehype-raw";
 import remarkMath from "remark-math";
 import { FC, memo, useState } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
@@ -146,18 +147,20 @@ const defaultComponents: any = {
     <hr className={cn("my-5 border-b", className)} {...props} />
   ),
   table: ({ className, ...props }: { className?: string }) => (
-    <table
-      className={cn(
-        "my-5 w-full border-separate border-spacing-0 overflow-y-auto",
-        className,
-      )}
-      {...props}
-    />
+    <div className="my-6 w-full overflow-x-auto rounded-lg border border-border/50 shadow-sm">
+      <table
+        className={cn(
+          "w-full border-collapse text-sm text-left",
+          className,
+        )}
+        {...props}
+      />
+    </div>
   ),
   th: ({ className, ...props }: { className?: string }) => (
     <th
       className={cn(
-        "bg-muted px-4 py-2 text-left font-bold first:rounded-tl-lg last:rounded-tr-lg [&[align=center]]:text-center [&[align=right]]:text-right",
+        "bg-muted/50 px-4 py-3 font-semibold text-muted-foreground border-b border-border/50 [&[align=center]]:text-center [&[align=right]]:text-right whitespace-nowrap",
         className,
       )}
       {...props}
@@ -166,7 +169,7 @@ const defaultComponents: any = {
   td: ({ className, ...props }: { className?: string }) => (
     <td
       className={cn(
-        "border-b border-l px-4 py-2 text-left last:border-r [&[align=center]]:text-center [&[align=right]]:text-right",
+        "px-4 py-3 border-b border-border/50 bg-background/50 [&[align=center]]:text-center [&[align=right]]:text-right",
         className,
       )}
       {...props}
@@ -175,7 +178,7 @@ const defaultComponents: any = {
   tr: ({ className, ...props }: { className?: string }) => (
     <tr
       className={cn(
-        "m-0 border-b p-0 first:border-t [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg",
+        "m-0 p-0 last:[&>td]:border-b-0 hover:bg-muted/20 transition-colors",
         className,
       )}
       {...props}
@@ -233,7 +236,7 @@ const MarkdownTextImpl: FC<{ children: string }> = ({ children }) => {
     <div className="markdown-content">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeKatex]}
+        rehypePlugins={[rehypeKatex, rehypeRaw]}
         components={defaultComponents}
       >
         {children}

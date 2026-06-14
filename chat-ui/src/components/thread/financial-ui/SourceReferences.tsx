@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { ChevronDown, ChevronUp, FileText } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText, Maximize2 } from "lucide-react";
 import { ChunkHit } from "@/providers/Stream";
+import { useContextPanel } from "@/providers/ContextPanel";
 
 interface SourceReferencesProps {
   chunkHits?: ChunkHit[];
@@ -9,6 +10,7 @@ interface SourceReferencesProps {
 
 export function SourceReferences({ chunkHits, citations }: SourceReferencesProps) {
   const [expanded, setExpanded] = useState(false);
+  const { openPanel } = useContextPanel();
 
   // Use citations if available, otherwise fallback to chunkHits
   const hasCitations = citations && citations.length > 0;
@@ -46,7 +48,14 @@ export function SourceReferences({ chunkHits, citations }: SourceReferencesProps
                 
                 // Handle object citations
                 return (
-                  <div key={idx} className="flex flex-col gap-1 text-sm border-b border-border/30 last:border-0 pb-2 last:pb-0">
+                  <div key={idx} className="flex flex-col gap-1 text-sm border-b border-border/30 last:border-0 pb-2 last:pb-0 relative group pr-6">
+                    <button 
+                      onClick={() => openPanel('source', citation)}
+                      className="absolute top-0 right-0 p-1 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-foreground"
+                      title="Read Document"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-foreground/80 text-xs">
                         {citation.title || "Document"}
@@ -77,7 +86,14 @@ export function SourceReferences({ chunkHits, citations }: SourceReferencesProps
               })
             : chunkHits!.map((hit, idx) => (
                 // Existing chunk_hits rendering
-                <div key={idx} className="flex flex-col gap-1 text-sm border-b border-border/30 last:border-0 pb-2 last:pb-0">
+                <div key={idx} className="flex flex-col gap-1 text-sm border-b border-border/30 last:border-0 pb-2 last:pb-0 relative group pr-6">
+                  <button 
+                    onClick={() => openPanel('source', hit)}
+                    className="absolute top-0 right-0 p-1 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-foreground"
+                    title="Read Document"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </button>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-foreground/80 text-xs">
                       {hit.metadata?.company || "Source Document"}

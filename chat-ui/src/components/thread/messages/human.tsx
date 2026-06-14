@@ -45,7 +45,11 @@ export function HumanMessage({
 
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState("");
-  const contentString = getContentString(message.content);
+  let contentString = getContentString(message.content);
+  const hiddenMarker = "\\n\\n[HIDDEN_TOOL_PROMPT_START]";
+  if (contentString.includes(hiddenMarker)) {
+    contentString = contentString.split(hiddenMarker)[0];
+  }
 
   const handleSubmitEdit = () => {
     setIsEditing(false);

@@ -14,14 +14,19 @@ import {
   Cell
 } from "recharts";
 import { VisualizationData } from "@/providers/Stream";
+import { Maximize2 } from "lucide-react";
+import { useContextPanel } from "@/providers/ContextPanel";
 
 interface DynamicChartProps {
   visualization?: VisualizationData;
+  className?: string;
+  hideExpand?: boolean;
 }
 
 const COLORS = ['#2563eb', '#16a34a', '#dc2626', '#ca8a04', '#9333ea', '#0891b2'];
 
-export function DynamicChart({ visualization }: DynamicChartProps) {
+export function DynamicChart({ visualization, className, hideExpand }: DynamicChartProps) {
+  const { openPanel } = useContextPanel();
   if (!visualization?.enabled || !visualization.data || visualization.data.length === 0) {
     return null;
   }
@@ -82,7 +87,16 @@ export function DynamicChart({ visualization }: DynamicChartProps) {
   };
 
   return (
-    <div className="w-full h-64 mt-4 p-4 border border-border/60 rounded-lg bg-card/50">
+    <div className={`relative w-full h-64 mt-4 p-4 border border-border/60 rounded-lg bg-card/50 group ${className || ""}`}>
+      {!hideExpand && (
+        <button 
+          onClick={() => openPanel('chart', visualization)}
+          className="absolute top-2 right-2 p-1.5 rounded-md bg-background/80 border border-border/50 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-foreground z-10 shadow-sm"
+          title="Expand Chart"
+        >
+          <Maximize2 className="w-4 h-4" />
+        </button>
+      )}
       <ResponsiveContainer width="100%" height="100%">
         {renderChart()}
       </ResponsiveContainer>
